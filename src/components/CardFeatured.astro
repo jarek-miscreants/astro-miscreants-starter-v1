@@ -1,0 +1,39 @@
+---
+  // CardFeatured.astro
+  interface Props {
+    eyebrow?: string;
+    title?: string;
+    description?: string;
+    border?: "all" | "y" | "x" | "none";
+    class?: string;
+  }
+  const {
+    eyebrow,
+    title,
+    description,
+    border = "all",
+    class: className = "",
+  } = Astro.props;
+
+  const borderClass = {
+    all:  "border border-grid-border",
+    y:    "border-y border-grid-border",
+    x:    "border-x border-grid-border",
+    none: "",
+  }[border];
+
+  const hasMedia = Astro.slots.has("media");
+  ---
+  <div class:list={["px-6 pt-8 relative", hasMedia ? "pb-0" : "pb-8", borderClass, className]}>
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center gap-2 text-sm">
+        <slot name="icon" />
+        <span class="text-gray-700">{eyebrow}</span>
+      </div>
+      <h3 class="h4 ">{title}</h3>
+      <p class="text-gray-500">{description}</p>
+      <slot name="media" />   {/* renders nothing if caller passes nothing */}
+    </div>
+  </div>
+
+

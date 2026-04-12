@@ -1,0 +1,47 @@
+---
+interface Props {
+  label?: string;
+  variant?: "primary" | "secondary";
+  href?: string;       // ← if provided, render as <a>; otherwise <button>
+  type?: "button" | "submit" | "reset";
+}
+
+const {
+  label = "Learn More",
+  variant = "primary",
+  href,
+  type = "button",
+} = Astro.props;
+
+const variantClasses = {
+  primary: "bg-blue-600 text-white hover:bg-blue-700",
+  secondary:
+    "bg-transparent text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white",
+};
+
+// Pick the element based on whether href was passed.
+// Astro lets you use a variable as a dynamic tag — must start with uppercase.
+const Tag = href ? "a" : "button";
+---
+
+<Tag
+  href={href}
+  type={!href ? type : undefined}
+  class={`group inline-flex items-center gap-4 px-5 py-2 transition-colors duration-300 relative ${variantClasses[variant]}`}
+>
+  <div>{label}</div>
+
+  <div class="relative w-6 h-6 overflow-hidden">
+    <div class="absolute inset-0 transition-transform duration-300 ease-in-out translate-x-0 group-hover:translate-x-full">
+      <svg width="100%" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <path d="M15.75 5.25L14.4987 6.46888L21.1312 13.125H3.5V14.875H21.1312L14.4987 21.5014L15.75 22.75L24.5 14L15.75 5.25Z" fill="currentColor"/>
+      </svg>
+    </div>
+
+    <div class="absolute inset-0 transition-transform duration-300 ease-in-out -translate-x-full group-hover:translate-x-0">
+      <svg width="100%" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <path d="M15.75 5.25L14.4987 6.46888L21.1312 13.125H3.5V14.875H21.1312L14.4987 21.5014L15.75 22.75L24.5 14L15.75 5.25Z" fill="currentColor"/>
+      </svg>
+    </div>
+  </div>
+</Tag>

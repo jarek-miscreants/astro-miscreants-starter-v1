@@ -1,0 +1,25 @@
+---
+interface Props {
+  region?: string;
+  portalId?: string;
+  formId?: string;
+}
+
+const {
+  region = "na1",
+  portalId = "40120329",
+  formId = "34f97be6-a435-4a54-a676-371efe148e70",
+} = Astro.props;
+---
+
+<div id="hubspot-form-container"></div>
+
+<script is:inline src="//js.hsforms.net/forms/embed/v2.js"></script>
+<script is:inline define:vars={{ region, portalId, formId }}>
+  hbspt.forms.create({
+    region: region,
+    portalId: portalId,
+    formId: formId,
+    target: "#hubspot-form-container",
+  });
+</script>

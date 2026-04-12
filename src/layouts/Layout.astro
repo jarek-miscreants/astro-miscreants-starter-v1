@@ -1,0 +1,48 @@
+---
+// A layout is a reusable wrapper for your pages.
+// Anything you put between <Layout>...</Layout> in a page lands in <slot />.
+//
+// Props are declared via an interface and read from Astro.props.
+import "@fontsource-variable/archivo";
+import "../styles/global.css";
+import Nav from "../components/Nav.astro";
+import SectionMain from "../components/SectionMain.astro";
+interface Props {
+  title?: string;
+}
+
+const { title = "Astro Playground" } = Astro.props;
+const gtagId = import.meta.env.PUBLIC_GTAG_ID;
+
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+
+    {gtagId && (
+      <>
+        <script type="text/partytown" async src={`https://www.googletagmanager.com/gtag/js?id=${gtagId}`}></script>
+        <script type="text/partytown" define:vars={{ gtagId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){ dataLayer.push(arguments); }
+          gtag('js', new Date());
+          gtag('config', gtagId);
+        </script>
+      </>
+    )}
+  </head>
+  <body>
+      <Nav />
+       <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-700 focus:text-white focus:rounded-sm">
+      Skip to main content
+    </a>
+    <slot />
+  </body>
+</html>

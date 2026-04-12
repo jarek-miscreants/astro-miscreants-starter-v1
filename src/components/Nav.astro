@@ -1,0 +1,410 @@
+---
+import Logo from "./Logo.astro";
+import Button from "./Button.astro";
+import AnnouncementBanner from "./AnnouncementBanner.astro";
+
+type PlainLink = { label: string; href: string };
+type MenuLink = {
+  label: string;
+  type: "menu";
+  id: string;
+  items: { label: string; href: string }[];
+};
+type MegaLink = {
+  label: string;
+  type: "mega";
+  id: string;
+  columns: {
+    heading: string;
+    items: { label: string; href: string; description?: string }[];
+  }[];
+};
+type NavLink = PlainLink | MenuLink | MegaLink;
+
+const links: NavLink[] = [
+  {
+    label: "Products",
+    type: "mega",
+    id: "products",
+    columns: [
+      {
+        heading: "Platform",
+        items: [
+          { label: "Overview", href: "#", description: "Everything in one place" },
+          { label: "Analytics", href: "#", description: "Track what matters" },
+          { label: "Integrations", href: "#", description: "Connect your stack" },
+        ],
+      },
+      {
+        heading: "Developers",
+        items: [
+          { label: "API reference", href: "#", description: "REST + GraphQL" },
+          { label: "SDKs", href: "#", description: "JS, Python, Go" },
+          { label: "CLI", href: "#", description: "Ship from the terminal" },
+        ],
+      },
+      {
+        heading: "Resources",
+        items: [
+          { label: "Documentation", href: "#", description: "Read the guides" },
+          { label: "Changelog", href: "#", description: "What's new" },
+          { label: "Status", href: "#", description: "Live uptime" },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Company",
+    type: "menu",
+    id: "company",
+    items: [
+      { label: "About", href: "#" },
+      { label: "Careers", href: "#" },
+      { label: "Blog", href: "#" },
+      { label: "Contact", href: "#" },
+    ],
+  },
+  { label: "Pricing", href: "#" },
+  { label: "Docs", href: "#" },
+  { label: "Changelog", href: "#" },
+];
+---
+
+<header data-nav class="section-grid-outside fixed inset-x-0 top-0 z-50 transition-all duration-300">
+
+    <AnnouncementBanner href="#" class="bg-gray-900 text-white text-sm">
+      <span><strong>New:</strong> Announcing our Series A funding</span>
+    </AnnouncementBanner>
+
+    <div data-nav-bar class="col-span-full relative md:col-span-1 md:col-start-3 flex h-14 items-center            
+  justify-between rounded-pill border border-grid-border transition-all duration-300"
+  >
+  <div data-accent="tl"></div><div data-accent="tr"></div>
+  <div data-accent="bl"></div><div data-accent="br"></div>
+   <a
+      href="/"
+      class="flex items-center px-2 text-fg transition hover:text-violet-bright"
+      aria-label="Miscreants home"
+    >
+      <Logo class="h-5 w-auto" />
+    </a>
+
+    <nav class="hidden self-stretch text-sm text-fg-muted md:flex">
+        
+      {
+        links.map((link) => {
+          if ("type" in link && link.type === "menu") {
+            return (
+              <div class="relative flex" data-nav-item>
+                <button
+                  type="button"
+                  data-nav-trigger
+                  aria-controls={`nav-panel-${link.id}`}
+                  aria-expanded="false"
+                  class="flex h-full items-center gap-1 px-4 transition hover:text-fg"
+                >
+                  {link.label}
+                  <svg data-icon="chevron-down" class="h-3 w-3 mt-0.5" viewBox="0 0 15 15" width="15"><desc>chevron-down</desc><g stroke-width="1"><g transform=""><path clip-rule="evenodd" d="M4.50001 5.79289L7.50001 8.79289L10.5 5.79289L11.2071 6.5L7.50001 10.2071L3.79291 6.5L4.50001 5.79289Z" fill="currentColor" fill-rule="evenodd"></path></g></g></svg>
+                </button>
+                <div
+                  id={`nav-panel-${link.id}`}
+                  data-nav-panel
+                  class="absolute left-0 top-full hidden min-w-48 "
+                >
+                  <div class="rounded-card border border-grid-border bg-bg-elevated/95 p-2 backdrop-blur-md shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_24px_-8px_rgba(0,0,0,0.08),0_24px_48px_-12px_rgba(0,0,0,0.12)]">
+                    {link.items.map((item) => (
+                      <a
+                        href={item.href}
+                        class="block rounded-md px-3 py-2 text-fg-muted transition hover:bg-white/5 hover:text-fg"
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          if ("type" in link && link.type === "mega") {
+            return (
+              <div class="flex" data-nav-item>
+                <button
+                  type="button"
+                  data-nav-trigger
+                  aria-controls={`nav-panel-${link.id}`}
+                  aria-expanded="false"
+                  class="flex h-full items-center gap-1 px-4 transition hover:text-fg"
+                >
+                  {link.label}
+                  <svg data-icon="chevron-down" class="h-3 w-3 mt-0.5" viewBox="0 0 15 15" width="15"><desc>chevron-down</desc><g stroke-width="1"><g transform=""><path clip-rule="evenodd" d="M4.50001 5.79289L7.50001 8.79289L10.5 5.79289L11.2071 6.5L7.50001 10.2071L3.79291 6.5L4.50001 5.79289Z" fill="currentColor" fill-rule="evenodd"></path></g></g></svg>
+                </button>
+              </div>
+            );
+          }
+
+          return (
+            <a href={link.href} class="flex h-full items-center px-4 transition hover:text-fg">
+              {link.label}
+            </a>
+          );
+        })
+      }
+    </nav>
+
+    <div class="flex items-center gap-2 pr-2">
+      <Button label="Get a Demo" />
+
+      <!-- Mobile hamburger -->
+      <button
+        type="button"
+        data-nav-toggle
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="nav-mobile-panel"
+        class="ml-1 grid h-9 w-9 place-items-center rounded-md border border-grid-border text-fg-muted transition hover:border-violet/40 hover:text-fg md:hidden"
+      >
+        <svg
+          class="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path data-nav-icon-open d="M3 6h18M3 12h18M3 18h18" />
+          <path data-nav-icon-close class="hidden" d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mega panels: live outside the bar so they can span full width -->
+  {
+    links
+      .filter((link): link is MegaLink => "type" in link && link.type === "mega")
+      .map((link) => (
+        <div
+          id={`nav-panel-${link.id}`}
+          data-nav-panel
+          data-nav-mega
+          class="container-page column-span-full md:col-span-1 md:col-start-3 absolute inset-x-0 top-full hidden "
+        >
+          <div class="rounded-card border border-grid-border bg-bg-elevated p-8 backdrop-blur-md shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_24px_-8px_rgba(0,0,0,0.08),0_24px_48px_-12px_rgba(0,0,0,0.12)]">
+            <div class="grid grid-cols-3 gap-8">
+              {link.columns.map((column) => (
+                <div>
+                  <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-fg-muted">
+                    {column.heading}
+                  </h3>
+                  <ul class="flex flex-col gap-1">
+                    {column.items.map((item) => (
+                      <li>
+                        <a
+                          href={item.href}
+                          class="block rounded-md px-3 py-2 transition hover:bg-white/5"
+                        >
+                          <div class="text-sm text-fg">{item.label}</div>
+                          {item.description && (
+                            <div class="text-xs text-fg-muted">{item.description}</div>
+                          )}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))
+  }
+
+  <!-- Mobile slide-down panel -->
+  <div
+    id="nav-mobile-panel"
+    data-nav-panel
+    data-nav-mobile
+    class="container-page col-start-3 mt-2 hidden overflow-hidden md:hidden"
+  >
+    <div class="rounded-card border border-grid-border bg-bg-elevated/95 p-4 backdrop-blur-md">
+      <nav class="flex flex-col gap-1 text-sm">
+        {
+          links.map((link) =>
+            "href" in link ? (
+              <a
+                href={link.href}
+                class="rounded-md px-3 py-2 text-fg-muted transition hover:bg-white/5 hover:text-fg"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <span class="rounded-md px-3 py-2 text-fg-muted">{link.label}</span>
+            )
+          )
+        }
+        <hr class="my-2 border-line" />
+        <a
+          href="#"
+          class="rounded-md px-3 py-2 text-fg-muted transition hover:bg-white/5 hover:text-fg"
+        >
+          Log in
+        </a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<style>
+  [data-nav-bar].is-scrolled {
+    border-color: var(--color-grid-border);
+    background-color: color-mix(in oklab, var(--color-bg) 100%, transparent);
+   
+    box-shadow: 0 8px 10px -10px rgba(0, 0, 0, 0.6);
+  }
+  [data-nav-trigger]:hover [data-icon="chevron-down"] {
+    transform: rotate(180deg);
+    transition: transform 0.2s ease-in-out;
+  }
+  [data-accent] {opacity: 0;}
+  [data-nav-bar].is-scrolled [data-accent] {opacity: 1; transition: opacity 0.2s ease-in-out;}
+</style>
+
+<script>
+  const navBar = document.querySelector<HTMLElement>("[data-nav-bar]");
+  const toggle = document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
+  const mobilePanel = document.querySelector<HTMLElement>("[data-nav-mobile]");
+  const iconOpen = document.querySelector<SVGElement>("[data-nav-icon-open]");
+  const iconClose = document.querySelector<SVGElement>("[data-nav-icon-close]");
+  const triggers = document.querySelectorAll<HTMLButtonElement>("[data-nav-trigger]");
+
+  // Scroll-aware bar
+  let isScrolled = false;
+  const update = () => {
+    if (!navBar) return;
+    const scrolled = window.scrollY > 12;
+    if (scrolled === isScrolled) return;
+    isScrolled = scrolled;
+    navBar.classList.toggle("is-scrolled", scrolled);
+  };
+  update();
+  window.addEventListener("scroll", update, { passive: true });
+
+  // Mobile menu: single state function
+  const setMobileOpen = (open: boolean) => {
+    if (!mobilePanel || !toggle) return;
+    mobilePanel.classList.toggle("hidden", !open);
+    iconOpen?.classList.toggle("hidden", open);
+    iconClose?.classList.toggle("hidden", !open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  };
+
+  toggle?.addEventListener("click", () => {
+    const isOpen = !mobilePanel?.classList.contains("hidden");
+    setMobileOpen(!isOpen);
+  });
+
+  mobilePanel?.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => setMobileOpen(false));
+  });
+
+  // Desktop dropdowns (menu + mega): hover + click, one at a time
+  const HOVER_ENTER = 100;
+  const HOVER_LEAVE = 150;
+  let hoverTimer: ReturnType<typeof setTimeout> | null = null;
+  let leaveTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const openDropdown = (trigger: HTMLButtonElement) => {
+    const id = trigger.getAttribute("aria-controls");
+    if (!id) return;
+    const panel = document.getElementById(id);
+    if (!panel) return;
+    if (!panel.classList.contains("hidden")) return;
+    closeAllDropdowns();
+    panel.classList.remove("hidden");
+    trigger.setAttribute("aria-expanded", "true");
+  };
+
+  const closeAllDropdowns = () => {
+    triggers.forEach((t) => {
+      t.setAttribute("aria-expanded", "false");
+      const id = t.getAttribute("aria-controls");
+      if (id) document.getElementById(id)?.classList.add("hidden");
+    });
+  };
+
+  const clearTimers = () => {
+    if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+    if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = null; }
+  };
+
+  const anyDropdownOpen = () =>
+    Array.from(triggers).some((t) => t.getAttribute("aria-expanded") === "true");
+
+  triggers.forEach((trigger) => {
+    // Click still toggles (mobile/keyboard friendly)
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = trigger.getAttribute("aria-controls");
+      if (!id) return;
+      const panel = document.getElementById(id);
+      if (!panel) return;
+      const willOpen = panel.classList.contains("hidden");
+      closeAllDropdowns();
+      if (willOpen) {
+        panel.classList.remove("hidden");
+        trigger.setAttribute("aria-expanded", "true");
+      }
+    });
+
+    // Hover: open after a small delay (hover intent).
+    // If another dropdown is already open, switch immediately.
+    trigger.addEventListener("mouseenter", () => {
+      clearTimers();
+      const delay = anyDropdownOpen() ? 0 : HOVER_ENTER;
+      hoverTimer = setTimeout(() => openDropdown(trigger), delay);
+    });
+  });
+
+  // Cancel close when mouse enters any nav-item or its panel.
+  // Start close timer when mouse leaves the whole nav region.
+  const navItems = document.querySelectorAll<HTMLElement>("[data-nav-item]");
+  const allPanels = document.querySelectorAll<HTMLElement>("[data-nav-panel]:not([data-nav-mobile])");
+
+  const cancelClose = () => {
+    if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = null; }
+    if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+  };
+  const scheduleClose = () => {
+    if (leaveTimer) clearTimeout(leaveTimer);
+    leaveTimer = setTimeout(closeAllDropdowns, HOVER_LEAVE);
+  };
+
+  navItems.forEach((item) => {
+    item.addEventListener("mouseleave", scheduleClose);
+    item.addEventListener("mouseenter", cancelClose);
+  });
+  allPanels.forEach((panel) => {
+    panel.addEventListener("mouseenter", cancelClose);
+    panel.addEventListener("mouseleave", scheduleClose);
+  });
+
+  // Click outside the nav closes any open dropdown
+  document.addEventListener("click", (e) => {
+    const target = e.target as Element;
+    if (!target.closest("[data-nav-item]") && !target.closest("[data-nav-mega]")) {
+      closeAllDropdowns();
+    }
+  });
+
+  // Escape closes everything
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    closeAllDropdowns();
+    if (mobilePanel && !mobilePanel.classList.contains("hidden")) {
+      setMobileOpen(false);
+    }
+  });
+</script>

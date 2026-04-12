@@ -1,0 +1,41 @@
+---
+interface Props {
+  id?: string;
+  padding?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
+  contentPadding?: "none" | "default";
+  contentClass?: string;
+  borderTop?: boolean;
+}
+const {
+  id,
+  padding = "md",
+  contentPadding = "default",
+  contentClass = "",
+  borderTop = false,
+} = Astro.props;
+
+const paddingClass = {
+  none: "",
+  xs: "section-padding-xs",
+  sm: "section-padding-sm",
+  md: "section-padding",
+  lg: "section-padding-lg",
+  xl: "section-padding-xl",
+}[padding];
+
+const contentPaddingClass = {
+  none: "px-0",
+  default: "px-6",
+}[contentPadding];
+---
+
+<section
+  id={id}
+  class:list={["section-grid-outside ", borderTop && "border-t border-grid-border"]}
+>
+  <div class="section-pattern relative col-start-2 border-x border-grid-border" aria-hidden="true"></div>
+  <div class:list={[paddingClass, "col-start-3 flex flex-col relative", contentPaddingClass, contentClass]}>
+    <slot />
+  </div>
+  <div class="section-pattern col-start-4 border-x border-grid-border" aria-hidden="true"></div>
+</section>
