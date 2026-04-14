@@ -4,6 +4,7 @@ interface Props {
   variant?: "primary" | "secondary";
   href?: string;       // ← if provided, render as <a>; otherwise <button>
   type?: "button" | "submit" | "reset";
+  class?: string;
 }
 
 const {
@@ -11,6 +12,7 @@ const {
   variant = "primary",
   href,
   type = "button",
+  class: className = "",
 } = Astro.props;
 
 const variantClasses = {
@@ -27,7 +29,11 @@ const Tag = href ? "a" : "button";
 <Tag
   href={href}
   type={!href ? type : undefined}
-  class={`group inline-flex items-center gap-4 px-5 py-2 transition-colors duration-300 relative ${variantClasses[variant]}`}
+  class:list={[
+    "group inline-flex max-w-fit border border-muted-dark items-center gap-3 pl-3 pr-5 py-2 transition-colors duration-300 relative rounded-sm text-mono uppercase text-body-sm",
+    variantClasses[variant],
+    className,
+  ]}
 >
   <div>{label}</div>
 
