@@ -6,6 +6,8 @@
     description?: string;
     border?: "all" | "y" | "x" | "none";
     class?: string;
+    titleClass?: string;
+    titleTag?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   }
   const {
     eyebrow,
@@ -13,6 +15,8 @@
     description,
     border = "all",
     class: className = "",
+    titleClass = "h3",
+    titleTag: TitleTag = "h3",
   } = Astro.props;
 
   const borderClass = {
@@ -24,15 +28,12 @@
 
   const hasMedia = Astro.slots.has("media");
   ---
-  <div class:list={["px-6 pt-8 relative", hasMedia ? "pb-0" : "pb-8", borderClass, className]}>
+  <div class:list={["px-4 pt-4 md:pt-8 md:px-8 rounded-sm relative", hasMedia ? "pb-0" : "pb-8", borderClass, className]}>
     <div class="flex flex-col gap-4">
-      <div class="flex items-center gap-2 text-sm">
-        <slot name="icon" />
-        <span class="text-gray-700">{eyebrow}</span>
-      </div>
-      <h3 class="h4 ">{title}</h3>
-      <p class="text-gray-500">{description}</p>
+      <TitleTag class={titleClass}>{title}</TitleTag>
+      <p class="text-muted">{description}</p>
       <slot name="media" />   {/* renders nothing if caller passes nothing */}
+      <slot name="button" />
     </div>
   </div>
 

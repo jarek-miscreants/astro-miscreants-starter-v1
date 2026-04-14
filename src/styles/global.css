@@ -235,6 +235,18 @@
 @utility section-padding    { @apply py-24 md:py-32; }
 @utility section-padding-lg { @apply py-32 md:py-48; }
 @utility section-padding-xl { @apply py-48 md:py-64; }
+
+@utility section-pt-xs { @apply pt-12 md:pt-16; }
+@utility section-pt-sm { @apply pt-16 md:pt-20; }
+@utility section-pt-md { @apply pt-24 md:pt-32; }
+@utility section-pt-lg { @apply pt-32 md:pt-48; }
+@utility section-pt-xl { @apply pt-48 md:pt-64; }
+
+@utility section-pb-xs { @apply pb-12 md:pb-16; }
+@utility section-pb-sm { @apply pb-16 md:pb-20; }
+@utility section-pb-md { @apply pb-24 md:pb-32; }
+@utility section-pb-lg { @apply pb-32 md:pb-48; }
+@utility section-pb-xl { @apply pb-48 md:pb-64; }
 @utility section-grid-outside {
   @apply grid grid-cols-[1fr_1rem_minmax(0,90rem)_1rem_1fr] md:grid-cols-[1fr_2.5rem_minmax(0,90rem)_2.5rem_1fr];
 }
