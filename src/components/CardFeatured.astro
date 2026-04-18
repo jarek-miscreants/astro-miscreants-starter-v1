@@ -1,40 +1,51 @@
 ---
-  // CardFeatured.astro
-  interface Props {
-    eyebrow?: string;
-    title?: string;
-    description?: string;
-    border?: "all" | "y" | "x" | "none";
-    class?: string;
-    titleClass?: string;
-    titleTag?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-  }
-  const {
-    eyebrow,
-    title,
-    description,
-    border = "all",
-    class: className = "",
-    titleClass = "h3",
-    titleTag: TitleTag = "h3",
-  } = Astro.props;
+interface Props {
+  title?: string;
+  description?: string;
+  border?: "all" | "y" | "x" | "none";
+  class?: string;
+  titleClass?: string;
+  titleTag?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+}
 
-  const borderClass = {
-    all:  "border border-grid-border",
-    y:    "border-y border-grid-border",
-    x:    "border-x border-grid-border",
-    none: "",
-  }[border];
+const {
+  title,
+  description,
+  border = "all",
+  class: className = "",
+  titleClass = "h3",
+  titleTag: TitleTag = "h3",
+} = Astro.props;
 
-  const hasMedia = Astro.slots.has("media");
-  ---
-  <div class:list={["px-4 pt-4 md:pt-8 md:px-8 rounded-sm relative", hasMedia ? "pb-0" : "pb-8", borderClass, className]}>
-    <div class="flex flex-col gap-4">
-      <TitleTag class={titleClass}>{title}</TitleTag>
-      <p class="text-muted">{description}</p>
-      <slot name="media" />   {/* renders nothing if caller passes nothing */}
-      <slot name="button" />
-    </div>
+const borderClass = {
+  all: "border border-border",
+  y: "border-y border-border",
+  x: "border-x border-border",
+  none: "",
+}[border];
+
+const hasEyebrow = Astro.slots.has("eyebrow");
+const hasMedia = Astro.slots.has("media");
+const hasButton = Astro.slots.has("button");
+---
+
+<div
+  class:list={[
+    "relative px-4 pt-4 md:px-8 md:pt-8",
+    hasMedia ? "pb-0" : "pb-8",
+    borderClass,
+    className,
+  ]}
+>
+  <div class="flex flex-col gap-4">
+    {hasEyebrow && (
+      <div class="text-body-sm text-text-muted">
+        <slot name="eyebrow" />
+      </div>
+    )}
+    {title && <TitleTag class={titleClass}>{title}</TitleTag>}
+    {description && <p class="text-text-muted">{description}</p>}
+    <slot name="media" />
+    {hasButton && <slot name="button" />}
   </div>
-
-
+</div>

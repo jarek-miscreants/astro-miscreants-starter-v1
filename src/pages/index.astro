@@ -47,8 +47,8 @@ const faqs = (await getCollection("faq"))
         </LogoMarquee>
       </SectionMain>
     
-      <SectionMain id="features" padding="sm" contentPadding="none" borderTop>
-      
+      <SectionMain id="features" paddingTop="sm" paddingBottom="none" contentPadding="none" borderTop>
+      <div class="container-large">
         <div class="flex flex-col px-6 gap-4">
           <h2 class="h2 ">Features</h2>
           <p class="mt-2 text-xl text-gray-800"></p>
@@ -57,47 +57,47 @@ const faqs = (await getCollection("faq"))
           <CardFeatured
           border="none"
           class="bg-bg"
-          eyebrow="Schema Builder"
           title="Design content structures your way."
           description="Miscreants gives you full control over content with a streamlined, API-first experience — perfect for teams who want speed without sacrificing flexibility."
         >
+          <span slot="eyebrow">Schema Builder</span>
           <Icon slot="icon" name="lucide:layers" class="w-6 h-6 text-gray-800" aria-hidden="true" />
           <img slot="media" src={featureOne.src} alt="Schema builder screenshot" class="w-full h-auto mt-4 mask-b-from-30% mask-b-to-95%" />
         </CardFeatured>
         <CardFeatured
         border="none"
         class="bg-bg"
-        eyebrow="Schema Builder"
         title="Design content structures your way."
         description="Miscreants gives you full control over content with a streamlined, API-first experience — perfect for teams who want speed without sacrificing flexibility."
       >
+        <span slot="eyebrow">Schema Builder</span>
         <Icon slot="icon" name="lucide:database" class="w-6 h-6 text-gray-800" aria-hidden="true" />
         <img slot="media" src={featureOne.src} alt="Schema builder screenshot" class="w-full h-auto mt-4 mask-b-from-30% mask-b-to-95%" />
       </CardFeatured>
       <CardFeatured
       border="none"
       class="bg-bg"
-      eyebrow="Schema Builder"
       title="Design content structures your way."
       description="Miscreants gives you full control over content with a streamlined, API-first experience — perfect for teams who want speed without sacrificing flexibility."
     >
+      <span slot="eyebrow">Schema Builder</span>
       <Icon slot="icon" name="lucide:zap" class="w-6 h-6 text-gray-800" aria-hidden="true" />
     </CardFeatured>
        <CardFeatured
         border="none"
         class="bg-bg"
-        eyebrow="Schema Builder"
         title="Design content structures your way."
         description="Miscreants gives you full control over content with a streamlined, API-first experience — perfect for teams who want speed without sacrificing flexibility."
       >
+        <span slot="eyebrow">Schema Builder</span>
         <Icon slot="icon" name="lucide:settings-2" class="w-6 h-6 text-gray-800" aria-hidden="true" />
       </CardFeatured>
         </div>
-         
+      </div>
       </SectionMain>
      
-      <SectionMain id="icons" padding="none" contentPadding="none" borderTop>
-
+      <SectionMain id="icons" padding="none" contentPadding="none" >
+<div class="container-large">
         <div class="section-pattern-horizontal w-full py-10"></div>
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-0 border-y border-grid-border divide-y lg:divide-y-0">
           <CardIcon header="98.3% uptime" class="bg-bg">
@@ -121,9 +121,10 @@ const faqs = (await getCollection("faq"))
             <p slot="content">Proven reliability across sources with proactive monitoring</p>
           </CardIcon>
         </div>
+      </div>
       </SectionMain>
 
-      <SectionMain id="tabs" padding="sm" borderTop>
+      <SectionMain id="tabs" padding="sm" >
         <div data-accent="tl"></div><div data-accent="tr"></div>
         <div data-accent="bl"></div><div data-accent="br"></div>
         <div class="flex flex-col gap-4 mb-6">

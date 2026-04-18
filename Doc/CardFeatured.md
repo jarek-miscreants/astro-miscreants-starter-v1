@@ -4,59 +4,74 @@
 
 ## What it does
 
-A content card with an eyebrow label, title, description, optional icon, and optional media slot (image, video, etc. that bleeds to the card bottom).
+A content card with an optional eyebrow, title, description, optional media (image/video that bleeds to the card bottom), and optional button area. Colors and borders are driven by semantic theme tokens, so the card flips automatically in dark mode.
 
 ## Props
 
-| Prop          | Type                                  | Default | Description                                |
-|---------------|---------------------------------------|---------|--------------------------------------------|
-| `eyebrow`     | `string`                              | —       | Small label above the title                |
-| `title`       | `string`                              | —       | Card heading (renders as `<h3>` with `h4` size) |
-| `description` | `string`                              | —       | Body text below the title                  |
-| `border`      | `"all" \| "y" \| "x" \| "none"`      | `"all"` | Which borders to show (using `border-grid-border`) |
-| `class`       | `string`                              | `""`    | Additional classes on the outer div        |
+| Prop          | Type                                  | Default  | Description                                                   |
+|---------------|---------------------------------------|----------|---------------------------------------------------------------|
+| `title`       | `string`                              | —        | Card heading text (rendered only if provided)                 |
+| `description` | `string`                              | —        | Body text below the title (rendered only if provided)         |
+| `border`      | `"all" \| "y" \| "x" \| "none"`       | `"all"`  | Which borders to show, using `border-border`                  |
+| `titleTag`    | `"h1" … "h6"`                         | `"h3"`   | Semantic heading level for the title                          |
+| `titleClass`  | `string`                              | `"h3"`   | Class applied to the title element (controls visual size)     |
+| `class`       | `string`                              | `""`     | Additional classes on the outer wrapper                       |
 
 ## Named slots
 
-| Slot    | Purpose                                                    |
-|---------|------------------------------------------------------------|
-| `icon`  | Icon displayed next to the eyebrow label                   |
-| `media` | Media content (image, screenshot) that bleeds to the bottom edge |
+| Slot      | Purpose                                                                 |
+|-----------|-------------------------------------------------------------------------|
+| `eyebrow` | Small label above the title. Renders only when content is provided.    |
+| `media`   | Media (image, video) that bleeds flush to the bottom edge of the card. |
+| `button`  | Action area below description / above media. Renders only when provided. |
+
+All three slots use `Astro.slots.has(...)` at build time, so nothing renders (and no empty wrapper is emitted) when a slot is unused.
 
 ## How it works
 
-- When the `media` slot has content, bottom padding is removed (`pb-0`) so the media can sit flush against the card bottom.
-- When no media is present, `pb-8` is applied for consistent spacing.
-- The border prop maps to Tailwind border classes using `border-grid-border` color.
+- The eyebrow slot is wrapped in a small `text-body-sm text-text-muted` container for a default muted-label look. Pass richer content (a `<Badge />`, icon + text, etc.) and it takes over.
+- When the `media` slot has content, bottom padding is removed (`pb-0`) so media sits flush with the card edge. Otherwise, `pb-8` keeps vertical spacing consistent.
+- The `border` prop maps to `border`, `border-y`, `border-x`, or no border, always using the theme's `--color-border` token.
+- Title is optional — if no `title` is passed, the heading element is not rendered at all.
 
 ## Usage
 
 ```astro
 ---
 import CardFeatured from "../components/CardFeatured.astro";
+import Button from "../components/Button.astro";
 ---
 
-<!-- Card with media -->
+<!-- Card with eyebrow + media -->
 <CardFeatured
-  eyebrow="Schema Builder"
   title="Design content structures your way."
   description="Full control with a streamlined, API-first experience."
   border="all"
 >
-  <svg slot="icon" class="w-4 h-4">...</svg>
+  <span slot="eyebrow">Schema Builder</span>
   <img slot="media" src="/screenshot.png" alt="Schema builder interface" />
 </CardFeatured>
 
-<!-- Card without media -->
+<!-- Card with eyebrow + button, no media -->
 <CardFeatured
-  eyebrow="API"
   title="Build faster with our REST API."
   description="Simple, well-documented endpoints."
   border="y"
+  titleTag="h2"
+>
+  <span slot="eyebrow">API</span>
+  <Button slot="button" href="/docs">Read docs</Button>
+</CardFeatured>
+
+<!-- Plain card, no eyebrow -->
+<CardFeatured
+  title="Learn more about our approach."
+  description="Straightforward, no surprises."
+  border="none"
 />
 ```
 
 ## Notes
 
-- The card does not include a link — wrap it with `Clickable` if the entire card should be clickable.
-- `Astro.slots.has("media")` is used at build time to conditionally adjust padding.
+- The card itself is not a link — wrap it with `Clickable` if the whole card should be tappable.
+- Because colors use semantic tokens, a card inside `[data-theme="dark"]` flips to dark-mode surface/border/text automatically.
