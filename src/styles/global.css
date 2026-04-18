@@ -74,6 +74,24 @@
   --color-warning-foreground: #0a0a0a;
   --color-ring: #0a0a0a;                 /* focus ring */
 
+  /* ---------- Radius ----------
+     Standard scale (xs–2xl) comes from Tailwind v4 defaults. Add semantic
+     handles for common shapes used in the design.
+     ----------------------------- */
+  --radius-card: 0.875rem;               /* dropdown panels, cards */
+  --radius-pill: 9999px;                 /* nav bar, pill buttons */
+
+  /* ---------- Shadows ----------
+     Layered popover shadow used by dropdowns and floating panels. Header
+     shadow appears only when the nav bar is scrolled. Both flip per theme.
+     ------------------------------ */
+  --shadow-popover:
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 12px 24px -8px rgb(0 0 0 / 0.08),
+    0 24px 48px -12px rgb(0 0 0 / 0.12);
+  --shadow-header:
+    0 8px 10px -10px rgb(0 0 0 / 0.2);
+
   /* ---------- Back-compat aliases ----------
      Existing components reference these names; keep them as alternate
      handles for the semantic roles above. New code should prefer the
@@ -122,6 +140,11 @@
   --color-grid-border: var(--color-border);
   --pattern-stripe: rgb(0 0 0 / 0.08);
   --accent-line: rgb(67 57 76);
+  --shadow-popover:
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 12px 24px -8px rgb(0 0 0 / 0.08),
+    0 24px 48px -12px rgb(0 0 0 / 0.12);
+  --shadow-header: 0 8px 10px -10px rgb(0 0 0 / 0.2);
 }
 
 [data-theme="dark"] {
@@ -148,6 +171,11 @@
   --color-grid-border: var(--color-border);
   --pattern-stripe: rgb(255 255 255 / 0.1);
   --accent-line: rgb(180 170 190);
+  --shadow-popover:
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 12px 24px -8px rgb(0 0 0 / 0.5),
+    0 24px 48px -12px rgb(0 0 0 / 0.6);
+  --shadow-header: 0 8px 10px -10px rgb(0 0 0 / 0.8);
 
   color-scheme: dark;
 }
@@ -167,6 +195,8 @@
   }
   html {
     scrollbar-gutter: stable;
+    /* Offset anchor-link scrolls so targets land below the fixed nav. */
+    scroll-padding-top: 6rem;
   }
 }
 
