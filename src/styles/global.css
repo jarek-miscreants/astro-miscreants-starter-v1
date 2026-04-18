@@ -1,10 +1,24 @@
 @import "tailwindcss";
 
 /* ==========================================================================
+   THEME ATTRIBUTE
+   Dark mode is controlled by [data-theme="dark"] on any ancestor. Nested
+   [data-theme="light"] islands work inside a dark ancestor and vice versa.
+   No system-preference fallback — theme is whatever the site sets.
+   `dark:` Tailwind variant is wired to the same selector, so utilities like
+   `dark:bg-surface` work alongside the var-based approach below.
+   ========================================================================== */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ==========================================================================
    THEME TOKENS
    Variables under recognized namespaces (--color-*, --spacing-*, --font-*,
    --container-*, etc.) auto-generate matching Tailwind utilities.
    --container-7xl: 90rem  →  max-w-7xl is now 90rem instead of default 80rem.
+
+   Semantic color roles (bg, surface, text, border, primary, …) are what
+   components should reference. Raw neutral scale is kept for backwards
+   compatibility and one-off cases only.
    ========================================================================== */
 @theme {
   /* ---------- Typography ---------- */
@@ -22,23 +36,120 @@
      nearest query container. Keep unitless so the math works in calc(). */
   --container-min: 20;
   --container-max: 90;
- /* ----------Colors ---------- */
- --color-neutral-50: #f9f9f9;
- --color-neutral-100: #f9f9f9;
- --color-neutral-200: #f3f3f3;
- --color-neutral-300: #f1f1f1;
- --color-neutral-400: #ebebeb;
- --color-neutral-500: #e8e8e8;
- --color-neutral-600: #e5e5e5;
- --color-neutral-700: #dfdfdf;
- --color-neutral-800: #dddddd;
- --color-neutral-900: #d7d7d7;
- --color-neutral-950: #d7d7d7;
 
-  --color-bg: var(--color-neutral-200);
-  --color-bg-elevated: var(--color-neutral-100);
+  /* ---------- Neutral scale (light) ---------- */
+  --color-neutral-50: #f9f9f9;
+  --color-neutral-100: #f9f9f9;
+  --color-neutral-200: #f3f3f3;
+  --color-neutral-300: #f1f1f1;
+  --color-neutral-400: #ebebeb;
+  --color-neutral-500: #e8e8e8;
+  --color-neutral-600: #e5e5e5;
+  --color-neutral-700: #dfdfdf;
+  --color-neutral-800: #dddddd;
+  --color-neutral-900: #d7d7d7;
+  --color-neutral-950: #d7d7d7;
+
+  /* ---------- Semantic roles — LIGHT defaults ----------
+     Override these in [data-theme="dark"] below. Components should read
+     from these (bg-surface, text-muted, border, …) rather than raw neutrals.
+     ------------------------------------------------------ */
+  --color-bg: #f3f3f3;                   /* page background */
+  --color-surface: #f9f9f9;              /* cards, popovers, elevated panels */
+  --color-surface-muted: #ebebeb;        /* subtle surfaces: code blocks, callouts */
+  --color-border: #d7d7d7;               /* default borders */
+  --color-border-strong: #bdbdbd;        /* emphasized borders, dividers */
+  --color-text: #0a0a0a;                 /* default text */
+  --color-text-muted: #525252;           /* captions, labels, secondary copy */
+  --color-text-subtle: #8a8a8a;          /* placeholders, disabled */
+  --color-primary: #0a0a0a;              /* brand / primary action */
+  --color-primary-foreground: #fafafa;   /* text on primary */
+  --color-accent: #ebebeb;               /* hover/selected bg for subtle items */
+  --color-accent-foreground: #0a0a0a;    /* text on accent */
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #fafafa;
+  --color-success: #16a34a;
+  --color-success-foreground: #fafafa;
+  --color-warning: #ca8a04;
+  --color-warning-foreground: #0a0a0a;
+  --color-ring: #0a0a0a;                 /* focus ring */
+
+  /* ---------- Back-compat aliases ----------
+     Existing components reference these names; keep them as alternate
+     handles for the semantic roles above. New code should prefer the
+     semantic names.
+     ------------------------------------------ */
+  --color-bg-elevated: var(--color-surface);
   --color-bg-neutral-500: var(--color-neutral-500);
-  --color-grid-border: var(--color-neutral-900);
+  --color-grid-border: var(--color-border);
+
+  /* ---------- Theme-aware decorative tokens ----------
+     Used by section-pattern and [data-accent]. Override per theme so
+     those utilities don't need to be rewritten in dark contexts.
+     -------------------------------------------------- */
+  --pattern-stripe: rgb(0 0 0 / 0.08);
+  --accent-line: rgb(67 57 76);
+}
+
+/* ==========================================================================
+   THEME OVERRIDES
+   Redefining the semantic tokens inside these scopes cascades to every
+   descendant automatically — no per-element dark utilities needed.
+   [data-theme="light"] repeats the defaults so a light island inside a
+   dark ancestor forces itself back to light.
+   ========================================================================== */
+[data-theme="light"] {
+  --color-bg: #f3f3f3;
+  --color-surface: #f9f9f9;
+  --color-surface-muted: #ebebeb;
+  --color-border: #d7d7d7;
+  --color-border-strong: #bdbdbd;
+  --color-text: #0a0a0a;
+  --color-text-muted: #525252;
+  --color-text-subtle: #8a8a8a;
+  --color-primary: #0a0a0a;
+  --color-primary-foreground: #fafafa;
+  --color-accent: #ebebeb;
+  --color-accent-foreground: #0a0a0a;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #fafafa;
+  --color-success: #16a34a;
+  --color-success-foreground: #fafafa;
+  --color-warning: #ca8a04;
+  --color-warning-foreground: #0a0a0a;
+  --color-ring: #0a0a0a;
+  --color-bg-elevated: var(--color-surface);
+  --color-grid-border: var(--color-border);
+  --pattern-stripe: rgb(0 0 0 / 0.08);
+  --accent-line: rgb(67 57 76);
+}
+
+[data-theme="dark"] {
+  --color-bg: #0a0a0a;
+  --color-surface: #141414;
+  --color-surface-muted: #1f1f1f;
+  --color-border: #2a2a2a;
+  --color-border-strong: #3d3d3d;
+  --color-text: #f5f5f5;
+  --color-text-muted: #a3a3a3;
+  --color-text-subtle: #6b6b6b;
+  --color-primary: #f5f5f5;
+  --color-primary-foreground: #0a0a0a;
+  --color-accent: #1f1f1f;
+  --color-accent-foreground: #f5f5f5;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #0a0a0a;
+  --color-success: #22c55e;
+  --color-success-foreground: #0a0a0a;
+  --color-warning: #eab308;
+  --color-warning-foreground: #0a0a0a;
+  --color-ring: #f5f5f5;
+  --color-bg-elevated: var(--color-surface);
+  --color-grid-border: var(--color-border);
+  --pattern-stripe: rgb(255 255 255 / 0.1);
+  --accent-line: rgb(180 170 190);
+
+  color-scheme: dark;
 }
 
 /* ==========================================================================
@@ -49,11 +160,13 @@
    ========================================================================== */
 @layer base {
   body {
-    
-    @apply bg-bg min-h-screen;
+    @apply bg-bg text-text min-h-screen;
+  }
+  body > main {
+    flex: 1 0 auto;
   }
   html {
-   scrollbar-gutter: stable;
+    scrollbar-gutter: stable;
   }
 }
 
@@ -191,43 +304,31 @@
 
 /*
  * Diagonal-stripes background. Pair with a child that has its own
- * background (e.g. .container-large with bg-white) — the child knocks
+ * background (e.g. .container-large with bg-bg) — the child knocks
  * out the middle and the pattern only shows in the gutter columns.
- *
- *   --pattern-fg → stripe color (translucent so it adapts to the page bg)
+ * Stripe color resolves from --pattern-stripe, which flips per theme.
  */
 @utility section-pattern {
-  --pattern-fg: rgb(0 0 0 / 0.08);
   background-image: repeating-linear-gradient(
     315deg,
-    var(--pattern-fg) 0,
-    var(--pattern-fg) 1px,
-    transparent 0,
-    transparent 50%
-  );
-  background-size: 5px 5px;  
-}
-
-
-@utility section-pattern-horizontal {
-  --pattern-fg: rgb(0 0 0 / 0.08);
-  background-image: repeating-linear-gradient(
-    315deg,
-    var(--pattern-fg) 0,
-    var(--pattern-fg) 1px,
+    var(--pattern-stripe) 0,
+    var(--pattern-stripe) 1px,
     transparent 0,
     transparent 50%
   );
   background-size: 5px 5px;
 }
 
-/* (Re-enable when the page itself is actually dark-themed.)
- * @media (prefers-color-scheme: dark) {
- *   .section-pattern {
- *     --pattern-fg: rgb(255 255 255 / 0.4);
- *   }
- * }
- */
+@utility section-pattern-horizontal {
+  background-image: repeating-linear-gradient(
+    315deg,
+    var(--pattern-stripe) 0,
+    var(--pattern-stripe) 1px,
+    transparent 0,
+    transparent 50%
+  );
+  background-size: 5px 5px;
+}
 
 /* Vertical rhythm only — horizontal padding is owned by .container-large */
 @utility section-padding-xs { @apply py-12 md:py-16; }
@@ -287,28 +388,28 @@
 [data-accent="tl"] {
   top: -1px;
   left: -1px;
-  border-top: 1px solid rgb(67, 57, 76);
-  border-left: 1px solid rgb(67, 57, 76);
+  border-top: 1px solid var(--accent-line);
+  border-left: 1px solid var(--accent-line);
 }
 
 [data-accent="tr"] {
   top: -1px;
   right: -1px;
-  border-top: 1px solid rgb(67, 57, 76);
-  border-right: 1px solid rgb(67, 57, 76);
+  border-top: 1px solid var(--accent-line);
+  border-right: 1px solid var(--accent-line);
 }
 
 [data-accent="bl"] {
   bottom: -1px;
   left: -1px;
-  border-bottom: 1px solid rgb(67, 57, 76);
-  border-left: 1px solid rgb(67, 57, 76);
+  border-bottom: 1px solid var(--accent-line);
+  border-left: 1px solid var(--accent-line);
 }
 
 [data-accent="br"] {
   bottom: -1px;
   right: -1px;
-  border-bottom: 1px solid rgb(67, 57, 76);
-  border-right: 1px solid rgb(67, 57, 76);
+  border-bottom: 1px solid var(--accent-line);
+  border-right: 1px solid var(--accent-line);
 }
 
