@@ -42,6 +42,7 @@ A practical guide to Astro 6 + Tailwind 4, written from a real learning conversa
 34. [GSAP & ScrollTrigger in Astro](#34-gsap--scrolltrigger-in-astro)
 35. [Third-party scripts with Partytown](#35-third-party-scripts-with-partytown)
 36. [Navigation patterns — from basic nav to dropdowns + mega menus](#36-navigation-patterns--from-basic-nav-to-dropdowns--mega-menus)
+37. [Sharing config between components (Nav + Footer)](#37-sharing-config-between-components-nav--footer)
 
 ---
 
@@ -4367,3 +4368,230 @@ Every layer above is a natural commit boundary. Each one is testable on its own:
 - Layer 12: "does the bar change appearance when scrolling?"
 
 Twelve commits, each one green before the next one starts. That's how you ship a nav without losing a weekend.
+
+---
+
+## 37. Sharing config between components (Nav + Footer)
+
+The Nav in this starter keeps all its data — links, CTA, home URL — inline in the component's frontmatter. That's deliberate: for one component on one site, inline is the shortest path from "I need to change a link" to "done."
+
+But eventually you'll hit the case where **Nav and Footer want the same data**. Both link to `/pricing`, `/docs`, `/blog`, `/contact`. You update one place and forget the other — now your footer says "Changelog" while the nav says "What's New." That's when config extraction earns its keep.
+
+This section walks through doing it properly, and — just as important — when NOT to bother.
+
+### The tradeoff: inline vs extracted
+
+| When                                             | Pick                |
+| ------------------------------------------------ | ------------------- |
+| Only one component uses the data                 | Inline              |
+| Two+ components share the same data              | Extract to `lib/`   |
+| Two+ components have *overlapping* data          | Extract the overlap |
+| Two+ components have totally different data      | Inline each         |
+| You want to re-skin the component without losing local edits | Extract     |
+
+The point of extraction isn't "cleanliness" — it's **one source of truth for data that's referenced in multiple places**. If there's only one place, there's nothing to share, and the extra file is just indirection.
+
+### Step-by-step: extract shared links for Nav + Footer
+
+Let's say you already have an inline Nav (like this starter's). You're about to build a Footer. Both will link to "Pricing", "Docs", and "Changelog" from the top-level nav, and both care about the list of company pages ("About", "Careers", "Blog", "Contact").
+
+#### Step 1 — identify what's actually shared
+
+Before writing any config file, list the data that appears in *both* components:
+
+| Data                                     | Nav | Footer |
+| ---------------------------------------- | --- | ------ |
+| Top-level links (Pricing, Docs, …)       | ✅  | ✅     |
+| Company links (About, Careers, …)        | ✅  | ✅     |
+| CTA button ("Get a Demo")                | ✅  | ❌     |
+| Mega-menu "Products" columns             | ✅  | ❌     |
+| Social media icons                       | ❌  | ✅     |
+| Legal links (Privacy, Terms)             | ❌  | ✅     |
+| Copyright line                           | ❌  | ✅     |
+
+The rows with ✅ in both columns are what deserves extraction. Everything else stays in its own component. Don't extract "all nav data" or "all footer data" as blobs — extract the overlap.
+
+#### Step 2 — create the shared file
+
+```ts
+// src/lib/siteLinks.ts
+
+export type SiteLink = { label: string; href: string };
+
+export const topLinks: SiteLink[] = [
+  { label: "Pricing", href: "/pricing" },
+  { label: "Docs", href: "/docs" },
+  { label: "Changelog", href: "/changelog" },
+];
+
+export const companyLinks: SiteLink[] = [
+  { label: "About", href: "/about" },
+  { label: "Careers", href: "/careers" },
+  { label: "Blog", href: "/blog" },
+  { label: "Contact", href: "/contact" },
+];
+```
+
+Notes:
+- **One type, shared.** `SiteLink` is the shape both components consume. Adding a `description?: string` later means both components get it for free.
+- **Export named, not default.** Default exports are anonymous when you grep. Named exports keep things searchable.
+- **Small scope.** Only what's actually shared lives here. Not the whole nav config.
+
+#### Step 3 — Nav imports and extends
+
+Nav has its own structure (mega panels, menu dropdowns) on top of the plain links. So Nav composes:
+
+```astro
+---
+// src/components/Nav.astro
+import { topLinks, companyLinks, type SiteLink } from "../lib/siteLinks";
+
+type MegaLink = {
+  label: string;
+  type: "mega";
+  id: string;
+  columns: { heading: string; items: SiteLink[] }[];
+};
+
+type MenuLink = {
+  label: string;
+  type: "menu";
+  id: string;
+  items: SiteLink[];
+};
+
+type NavLink = SiteLink | MenuLink | MegaLink;
+
+const links: NavLink[] = [
+  {
+    label: "Products",
+    type: "mega",
+    id: "products",
+    columns: [
+      { heading: "Platform", items: [/* mega-only items */] },
+    ],
+  },
+  {
+    label: "Company",
+    type: "menu",
+    id: "company",
+    items: companyLinks,    // ← shared data
+  },
+  ...topLinks,              // ← shared data spread as plain links
+];
+---
+```
+
+The mega-menu data is Nav-only, so it stays in Nav's frontmatter. The company dropdown pulls from the shared array. The top-level links spread from the shared array. Nav renders its own layout; the data flows in from one source.
+
+#### Step 4 — Footer consumes the same data
+
+```astro
+---
+// src/components/Footer.astro
+import { topLinks, companyLinks, type SiteLink } from "../lib/siteLinks";
+
+// Footer-only data stays inline:
+const legalLinks: SiteLink[] = [
+  { label: "Privacy", href: "/privacy" },
+  { label: "Terms", href: "/terms" },
+];
+
+const copyright = "© 2026 Miscreants";
+---
+
+<footer class="border-t border-border py-16">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+    <div>
+      <h3 class="font-semibold mb-3">Product</h3>
+      <ul class="flex flex-col gap-2">
+        {topLinks.map((link) => (
+          <li>
+            <a href={link.href} class="text-text-muted hover:text-text">
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="font-semibold mb-3">Company</h3>
+      <ul class="flex flex-col gap-2">
+        {companyLinks.map((link) => (
+          <li>
+            <a href={link.href} class="text-text-muted hover:text-text">
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="font-semibold mb-3">Legal</h3>
+      <ul class="flex flex-col gap-2">
+        {legalLinks.map((link) => (
+          <li>
+            <a href={link.href} class="text-text-muted hover:text-text">
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <p class="mt-8 text-sm text-text-subtle">{copyright}</p>
+</footer>
+```
+
+Same `topLinks`, same `companyLinks`. Rename "Contact" → "Get in touch" in `siteLinks.ts` and both components update on the next build.
+
+#### Step 5 — the real win: types
+
+The unsung benefit of extraction isn't the data — it's the type. Once `SiteLink` is defined once:
+
+- A future `Breadcrumb.astro` imports it.
+- A future `SiteMap.astro` imports it.
+- A `sitemap.xml` endpoint loops over `[...topLinks, ...companyLinks]` to generate the feed.
+- An A/B test imports the list and swaps labels based on a flag.
+
+The type is a contract. Anything that speaks `SiteLink` speaks to everything else.
+
+### Variation: when nav and footer have totally different links
+
+What if the Nav links to "Pricing, Docs, Changelog" and the Footer links to "Jobs, Press, Investor Relations" — no overlap at all?
+
+Then **you don't extract**. Each component keeps its own inline array. `src/lib/siteLinks.ts` doesn't get created. Don't make a file just because "sharing feels organized." You'd be paying the indirection cost for zero benefit.
+
+But if there's even *one* thing in common — say, the company logo and its `href="/"` — extract only that:
+
+```ts
+// src/lib/siteLinks.ts
+export const homeHref = "/";
+export const logoSrc = "/logo.svg";
+```
+
+Two lines. Both components import those two constants. Nav keeps its own link array inline; Footer keeps its own inline. The shared file is exactly the size of the overlap.
+
+### Gotchas
+
+**1. Circular imports.** If `Nav.astro` imports from `siteLinks.ts`, nothing in `siteLinks.ts` should import from any component. Keep `lib/` a leaf: data-only, no UI imports, no framework dependencies.
+
+**2. Relative paths.** From `src/components/Nav.astro`, the import is `"../lib/siteLinks"`. You can set up a TypeScript path alias (`@/lib/siteLinks`) in `tsconfig.json` — worth it once you have more than a few `../../` climbs, overkill before that.
+
+**3. Types vs values.** Use `import { type SiteLink }` (or `import type`) for types-only imports. It tells the bundler "this is erased at build time" and prevents accidental import cycles. Values (`topLinks`, `companyLinks`) don't need it.
+
+**4. Don't mix data and helpers.** If you later add `getLinkByHref()` or `filterByCategory()`, put those in a separate file (`src/lib/links.ts`) or inline them in the consumer. `siteLinks.ts` should stay boring data so you can re-read it in 2 seconds.
+
+**5. Don't pre-commit.** You don't need the shared file on day 1. Build Nav inline. Build Footer inline. The day you find yourself ctrl-F'ing "/pricing" across two files, that's when you extract. The pattern works best as a response to a concrete duplication, not an anticipation of one.
+
+### Why this starter keeps Nav inline
+
+This starter kept Nav inline because:
+1. There's currently no Footer component consuming the same data.
+2. Adding `src/lib/navConfig.ts` for a single consumer is ceremony with no payoff — one extra file to open, one extra import to read, one extra mental hop.
+3. When the Footer lands, we'll extract whatever actually overlaps. Not the whole nav config — just the overlap.
+
+**The general principle:** prefer inline until a second consumer shows up. Then extract exactly what's shared, not more. Resist the urge to invent a "nice architecture" ahead of the actual need. Premature abstraction is just as expensive as premature optimization.
