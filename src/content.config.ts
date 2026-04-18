@@ -10,4 +10,16 @@ const faq = defineCollection({
   }),
 });
 
-export const collections = { faq };
+const announcements = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/announcements" }),
+  schema: z.object({
+    href: z.string().optional(),
+    dismissible: z.boolean().default(true),
+    startsAt: z.coerce.date().optional(),
+    endsAt: z.coerce.date().optional(),
+    enabled: z.boolean().default(true),
+    priority: z.number().default(0),
+  }),
+});
+
+export const collections = { faq, announcements };
