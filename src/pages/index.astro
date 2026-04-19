@@ -23,13 +23,13 @@ const faqs = (await getCollection("faq"))
 ---
 
 <Layout title="Astro Playground">                                                                                                                                                                                                                             
-    <main id="main" class="border-y border-grid-border">
+    <main id="main" class="border-y border-stroke">
 
-      <SectionMain id="hero" padding="none" contentPadding="none" contentClass="items-center text-center relative">
+      <SectionMain  id="hero" padding="none" contentPadding="none" contentClass="items-center text-center relative">
       
         <div class="relative z-20 flex flex-col items-center gap-2 py-32 md:py-48 px-6">
           <h1 class="h1">Hello World</h1>
-          <p class="mt-2 text-xl text-gray-800">This is a playground for Astro.</p>
+          <p class="mt-2 text-xl text-fg-muted">This is a playground for Astro.</p>
           <TestComponent message="Test" />
           <ButtonGroup>
             <Button />
@@ -51,73 +51,73 @@ const faqs = (await getCollection("faq"))
       <div class="container-large">
         <div class="flex flex-col px-6 gap-4">
           <h2 class="h2 ">Features</h2>
-          <p class="mt-2 text-xl text-gray-800"></p>
+          <p class="mt-2 text-xl text-fg-muted"></p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-grid-border border-y border-grid-border">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-stroke border-y border-stroke">
           <CardFeatured
           border="none"
-          class="bg-bg"
+          class="bg-canvas"
           title="Design content structures your way."
           description="Miscreants gives you full control over content with a streamlined, API-first experience — perfect for teams who want speed without sacrificing flexibility."
         >
           <span slot="eyebrow">Schema Builder</span>
-          <Icon slot="icon" name="lucide:layers" class="w-6 h-6 text-gray-800" aria-hidden="true" />
+          <Icon slot="icon" name="lucide:layers" class="w-6 h-6 text-fg-muted" aria-hidden="true" />
           <img slot="media" src={featureOne.src} alt="Schema builder screenshot" class="w-full h-auto mt-4 mask-b-from-30% mask-b-to-95%" />
         </CardFeatured>
         <CardFeatured
         border="none"
-        class="bg-bg"
+        class="bg-canvas"
         title="Design content structures your way."
         description="Miscreants gives you full control over content with a streamlined, API-first experience — perfect for teams who want speed without sacrificing flexibility."
       >
         <span slot="eyebrow">Schema Builder</span>
-        <Icon slot="icon" name="lucide:database" class="w-6 h-6 text-gray-800" aria-hidden="true" />
+        <Icon slot="icon" name="lucide:database" class="w-6 h-6 text-fg-muted" aria-hidden="true" />
         <img slot="media" src={featureOne.src} alt="Schema builder screenshot" class="w-full h-auto mt-4 mask-b-from-30% mask-b-to-95%" />
       </CardFeatured>
       <CardFeatured
       border="none"
-      class="bg-bg"
+      class="bg-canvas"
       title="Design content structures your way."
       description="Miscreants gives you full control over content with a streamlined, API-first experience — perfect for teams who want speed without sacrificing flexibility."
     >
       <span slot="eyebrow">Schema Builder</span>
-      <Icon slot="icon" name="lucide:zap" class="w-6 h-6 text-gray-800" aria-hidden="true" />
+      <Icon slot="icon" name="lucide:zap" class="w-6 h-6 text-fg-muted" aria-hidden="true" />
     </CardFeatured>
        <CardFeatured
         border="none"
-        class="bg-bg"
+        class="bg-canvas"
         title="Design content structures your way."
         description="Miscreants gives you full control over content with a streamlined, API-first experience — perfect for teams who want speed without sacrificing flexibility."
       >
         <span slot="eyebrow">Schema Builder</span>
-        <Icon slot="icon" name="lucide:settings-2" class="w-6 h-6 text-gray-800" aria-hidden="true" />
+        <Icon slot="icon" name="lucide:settings-2" class="w-6 h-6 text-fg-muted" aria-hidden="true" />
       </CardFeatured>
         </div>
       </div>
       </SectionMain>
      
-      <SectionMain id="icons" padding="none" contentPadding="none" >
+      <SectionMain  id="icons" padding="none" contentPadding="none" >
 <div class="container-large">
-        <div class="section-pattern-horizontal w-full py-10"></div>
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-0 border-y border-grid-border divide-y lg:divide-y-0">
-          <CardIcon header="98.3% uptime" class="bg-bg">
-            <Icon slot="icon" name="lucide:activity" class="w-6 h-6 text-gray-800 mb-4" aria-hidden="true" />
+        <div   class="section-pattern-horizontal w-full py-10"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-0 border-y border-stroke divide-y lg:divide-y-0">
+          <CardIcon header="98.3% uptime" class="bg-canvas">
+            <Icon slot="icon" name="lucide:activity" class="w-6 h-6 text-fg-muted mb-4" aria-hidden="true" />
             <p slot="content">Proven reliability across sources with proactive monitoring</p>
           </CardIcon>
-          <CardIcon header="Enterprise security" class="bg-bg">
-            <Icon slot="icon" name="lucide:shield-check" class="w-6 h-6 text-gray-800 mb-4" aria-hidden="true" />
+          <CardIcon header="Enterprise security" class="bg-canvas">
+            <Icon slot="icon" name="lucide:shield-check" class="w-6 h-6 text-fg-muted mb-4" aria-hidden="true" />
             <p slot="content">Encryption at every step with compliance-ready infrastructure</p>
           </CardIcon>
-          <CardIcon header="Scalable infrastructure" class="bg-bg">
-            <Icon slot="icon" name="lucide:server" class="w-6 h-6 text-gray-800 mb-4" aria-hidden="true" />
+          <CardIcon header="Scalable infrastructure" class="bg-canvas">
+            <Icon slot="icon" name="lucide:server" class="w-6 h-6 text-fg-muted mb-4" aria-hidden="true" />
             <p slot="content">Scale your workflow to hundreds of millions of daily fetches</p>
           </CardIcon>
-          <CardIcon header="24/7 support" class="bg-bg">
-            <Icon slot="icon" name="lucide:headphones" class="w-6 h-6 text-gray-800 mb-4" aria-hidden="true" />
+          <CardIcon header="24/7 support" class="bg-canvas">
+            <Icon slot="icon" name="lucide:headphones" class="w-6 h-6 text-fg-muted mb-4" aria-hidden="true" />
             <p slot="content">Proven reliability across sources with proactive monitoring</p>
           </CardIcon>
-          <CardIcon header="24/7 support" class="bg-bg">
-            <Icon slot="icon" name="lucide:life-buoy" class="w-6 h-6 text-gray-800 mb-4" aria-hidden="true" />
+          <CardIcon header="24/7 support" class="bg-canvas">
+            <Icon slot="icon" name="lucide:life-buoy" class="w-6 h-6 text-fg-muted mb-4" aria-hidden="true" />
             <p slot="content">Proven reliability across sources with proactive monitoring</p>
           </CardIcon>
         </div>
@@ -129,24 +129,24 @@ const faqs = (await getCollection("faq"))
         <div data-accent="bl"></div><div data-accent="br"></div>
         <div class="flex flex-col gap-4 mb-6">
           <h2 class="h3">Tabs Component</h2>
-          <p class="mt-2  text-gray-800">Accessible tabs with accordion conversion on mobile.</p>
+          <p class="mt-2  text-fg-muted">Accessible tabs with accordion conversion on mobile.</p>
         </div>
 
         <Tabs id="demo" convertAccordion slideTabs>
-          <div data-tab="button-list" class="flex w-full gap-1 border-b border-grid-border [&>*]:flex-1 [&>*]:justify-center">
-            <button data-tab="button" class="px-4 py-3 text-sm text-gray-800 border-b-2 border-transparent cursor-pointer transition-colors hover:text-gray-900 [&.is-active]:text-gray-900 [&.is-active]:border-gray-900">
+          <div data-tab="button-list" class="flex w-full gap-1 border-b border-stroke [&>*]:flex-1 [&>*]:justify-center">
+            <button data-tab="button" class="px-4 py-3 text-sm text-fg-muted border-b-2 border-transparent cursor-pointer transition-colors hover:text-fg [&.is-active]:text-fg [&.is-active]:border-fg">
               <span class="flex items-center gap-2">
                 <Icon name="lucide:layers" class="w-4 h-4" aria-hidden="true" />
                 Overview
               </span>
             </button>
-            <button data-tab="button" class="px-4 py-3 text-sm text-gray-800 border-b-2 border-transparent cursor-pointer transition-colors hover:text-gray-900 [&.is-active]:text-gray-900 [&.is-active]:border-gray-900">
+            <button data-tab="button" class="px-4 py-3 text-sm text-fg-muted border-b-2 border-transparent cursor-pointer transition-colors hover:text-fg [&.is-active]:text-fg [&.is-active]:border-fg">
               <span class="flex items-center gap-2">
                 <Icon name="lucide:zap" class="w-4 h-4" aria-hidden="true" />
                 Features
               </span>
             </button>
-            <button data-tab="button" class="px-4 py-3 text-sm text-gray-800 border-b-2 border-transparent cursor-pointer transition-colors hover:text-gray-900 [&.is-active]:text-gray-900 [&.is-active]:border-gray-900">
+            <button data-tab="button" class="px-4 py-3 text-sm text-fg-muted border-b-2 border-transparent cursor-pointer transition-colors hover:text-fg [&.is-active]:text-fg [&.is-active]:border-fg">
               <span class="flex items-center gap-2">
                 <Icon name="lucide:code" class="w-4 h-4" aria-hidden="true" />
                 Code
@@ -158,44 +158,44 @@ const faqs = (await getCollection("faq"))
             <div data-tab="panel">
               <div class="py-4 md:py-2">
               <h3 class="h4 mb-4">Built for speed</h3>
-              <p class="text-gray-800 max-w-2xl ">Astro delivers lightning-fast websites by shipping zero JavaScript by default. Only hydrate the components that need interactivity — everything else is pure HTML.</p>
+              <p class="text-fg-muted max-w-2xl ">Astro delivers lightning-fast websites by shipping zero JavaScript by default. Only hydrate the components that need interactivity — everything else is pure HTML.</p>
             </div>
          
             </div>
             <div data-tab="panel">
               <div class="py-4 md:py-2">
               <h3 class="h4 mb-4">Island architecture</h3>
-              <p class="text-gray-800 max-w-2xl">Each interactive component is an isolated island. They load independently, so a slow component never blocks the rest of your page from rendering.</p>
+              <p class="text-fg-muted max-w-2xl">Each interactive component is an isolated island. They load independently, so a slow component never blocks the rest of your page from rendering.</p>
             </div>
             </div>
             <div data-tab="panel">
               <div class="py-4 md:py-2">
               <h3 class="h4 mb-4">Framework agnostic</h3>
-              <p class="text-gray-800 max-w-2xl">Use React, Vue, Svelte, or Solid — all in the same project. Astro lets you pick the best tool for each component without locking you into a single framework.</p>
+              <p class="text-fg-muted max-w-2xl">Use React, Vue, Svelte, or Solid — all in the same project. Astro lets you pick the best tool for each component without locking you into a single framework.</p>
             </div>
             </div>
           </div>
         </Tabs>
       </SectionMain>
 
-      <SectionMain id="accordion" padding="sm" borderTop>
+      <SectionMain  id="accordion" padding="sm" borderTop>
       
         <div class="flex flex-col gap-4 mb-6">
           <h2 class="h3">Accordion Component</h2>
-          <p class="mt-2 text-gray-800">FAQ-style accordion with CSS-only animations.</p>
+          <p class="mt-2 text-fg-muted">FAQ-style accordion with CSS-only animations.</p>
         </div>
 
         <Accordion openByDefault={1} class="flex flex-col ">
           {faqs.map(async (faq) => {
             const { Content } = await render(faq);
             return (
-              <div data-accordion="item" class="bg-bg group">
-                <button data-accordion="button" class="flex w-full items-center justify-between py-5 cursor-pointer text-left group-hover:text-gray-900">
+              <div data-accordion="item" class="bg-canvas group">
+                <button data-accordion="button" class="flex w-full items-center justify-between py-5 cursor-pointer text-left group-hover:text-fg">
                   <span class="h5">{faq.data.question}</span>
-                  <Icon data-accordion="icon" name="lucide:chevron-down" class="w-5 h-5 text-gray-800 shrink-0" aria-hidden="true" />
+                  <Icon data-accordion="icon" name="lucide:chevron-down" class="w-5 h-5 text-fg-muted shrink-0" aria-hidden="true" />
                 </button>
                 <div data-accordion="content">
-                  <div class="pb-5 text-gray-800">
+                  <div class="pb-5 text-fg-muted">
                     <Content />
                   </div>
                 </div>

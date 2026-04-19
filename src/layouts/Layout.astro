@@ -6,7 +6,7 @@
 import "@fontsource-variable/archivo";
 import "../styles/global.css";
 import { getCollection, render } from "astro:content";
-import Nav from "../components/Nav.astro";
+import Nav from "../components/NavMorph.astro";
 import AnnouncementBanner from "../components/AnnouncementBanner.astro";
 interface Props {
   title?: string;
@@ -65,7 +65,7 @@ const AnnouncementContent = announcement
           slot="announcement"
           href={announcement.data.href}
           dismissible={announcement.data.dismissible}
-          class="bg-primary text-primary-foreground text-sm"
+          class="bg-intent text-fg-on-intent text-sm"
         >
           <AnnouncementContent />
         </AnnouncementBanner>
@@ -73,7 +73,7 @@ const AnnouncementContent = announcement
     </Nav>
     <a
       href="#main"
-      class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-sm"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-intent focus:text-fg-on-intent focus:rounded-sm"
     >
       Skip to main content
     </a>

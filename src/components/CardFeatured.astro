@@ -18,9 +18,9 @@ const {
 } = Astro.props;
 
 const borderClass = {
-  all: "border border-border",
-  y: "border-y border-border",
-  x: "border-x border-border",
+  all: "border border-stroke",
+  y: "border-y border-stroke",
+  x: "border-x border-stroke",
   none: "",
 }[border];
 
@@ -39,12 +39,12 @@ const hasButton = Astro.slots.has("button");
 >
   <div class="flex flex-col gap-4">
     {hasEyebrow && (
-      <div class="text-body-sm text-text-muted">
+      <div class="text-body-sm text-fg-muted">
         <slot name="eyebrow" />
       </div>
     )}
     {title && <TitleTag class={titleClass}>{title}</TitleTag>}
-    {description && <p class="text-text-muted">{description}</p>}
+    {description && <p class="text-fg-muted">{description}</p>}
     <slot name="media" />
     {hasButton && <slot name="button" />}
   </div>

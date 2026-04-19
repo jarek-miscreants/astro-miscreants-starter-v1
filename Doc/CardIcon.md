@@ -24,7 +24,7 @@ A simple card with an icon, eyebrow text, heading, and content slot. Used for st
 ## How it works
 
 - Simple vertical stack layout with `flex-col`.
-- Has left/right borders using `border-grid-border` (designed to sit in a grid where cards share borders).
+- Has left/right borders using `border-stroke` (designed to sit in a grid where cards share borders).
 - Fixed padding: `px-6 py-8`.
 
 ## Usage

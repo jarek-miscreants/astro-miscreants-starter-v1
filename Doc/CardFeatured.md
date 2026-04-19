@@ -12,7 +12,7 @@ A content card with an optional eyebrow, title, description, optional media (ima
 |---------------|---------------------------------------|----------|---------------------------------------------------------------|
 | `title`       | `string`                              | —        | Card heading text (rendered only if provided)                 |
 | `description` | `string`                              | —        | Body text below the title (rendered only if provided)         |
-| `border`      | `"all" \| "y" \| "x" \| "none"`       | `"all"`  | Which borders to show, using `border-border`                  |
+| `border`      | `"all" \| "y" \| "x" \| "none"`       | `"all"`  | Which borders to show, using `border-stroke`                  |
 | `titleTag`    | `"h1" … "h6"`                         | `"h3"`   | Semantic heading level for the title                          |
 | `titleClass`  | `string`                              | `"h3"`   | Class applied to the title element (controls visual size)     |
 | `class`       | `string`                              | `""`     | Additional classes on the outer wrapper                       |
@@ -29,9 +29,9 @@ All three slots use `Astro.slots.has(...)` at build time, so nothing renders (an
 
 ## How it works
 
-- The eyebrow slot is wrapped in a small `text-body-sm text-text-muted` container for a default muted-label look. Pass richer content (a `<Badge />`, icon + text, etc.) and it takes over.
+- The eyebrow slot is wrapped in a small `text-body-sm text-fg-muted` container for a default muted-label look. Pass richer content (a `<Badge />`, icon + text, etc.) and it takes over.
 - When the `media` slot has content, bottom padding is removed (`pb-0`) so media sits flush with the card edge. Otherwise, `pb-8` keeps vertical spacing consistent.
-- The `border` prop maps to `border`, `border-y`, `border-x`, or no border, always using the theme's `--color-border` token.
+- The `border` prop maps to `border`, `border-y`, `border-x`, or no border, always using the theme's `--color-stroke` token.
 - Title is optional — if no `title` is passed, the heading element is not rendered at all.
 
 ## Usage

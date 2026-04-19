@@ -49,6 +49,13 @@ const {
   [data-accordion="item"].is-active [data-accordion="icon"] {
     transform: rotate(180deg);
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-accordion="content"],
+    [data-accordion="icon"] {
+      transition: none;
+    }
+  }
 </style>
 
 <script>

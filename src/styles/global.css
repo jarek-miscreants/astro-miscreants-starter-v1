@@ -6,7 +6,7 @@
    [data-theme="light"] islands work inside a dark ancestor and vice versa.
    No system-preference fallback — theme is whatever the site sets.
    `dark:` Tailwind variant is wired to the same selector, so utilities like
-   `dark:bg-surface` work alongside the var-based approach below.
+   `dark:bg-panel` work alongside the var-based approach below.
    ========================================================================== */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
@@ -16,9 +16,9 @@
    --container-*, etc.) auto-generate matching Tailwind utilities.
    --container-7xl: 90rem  →  max-w-7xl is now 90rem instead of default 80rem.
 
-   Semantic color roles (bg, surface, text, border, primary, …) are what
-   components should reference. Raw neutral scale is kept for backwards
-   compatibility and one-off cases only.
+   Semantic color roles (canvas, panel, fg, stroke, intent, …) are what
+   components should reference. Raw neutral scale is kept for one-off cases
+   only — prefer the semantic roles so dark mode "just works".
    ========================================================================== */
 @theme {
   /* ---------- Typography ---------- */
@@ -52,27 +52,35 @@
 
   /* ---------- Semantic roles — LIGHT defaults ----------
      Override these in [data-theme="dark"] below. Components should read
-     from these (bg-surface, text-muted, border, …) rather than raw neutrals.
+     from these (bg-canvas, text-fg, border-stroke, …) rather than raw
+     neutrals — dark mode then "just works" via the cascade.
      ------------------------------------------------------ */
-  --color-bg: #f3f3f3;                   /* page background */
-  --color-surface: #f9f9f9;              /* cards, popovers, elevated panels */
-  --color-surface-muted: #ebebeb;        /* subtle surfaces: code blocks, callouts */
-  --color-border: #d7d7d7;               /* default borders */
-  --color-border-strong: #bdbdbd;        /* emphasized borders, dividers */
-  --color-text: #0a0a0a;                 /* default text */
-  --color-text-muted: #525252;           /* captions, labels, secondary copy */
-  --color-text-subtle: #8a8a8a;          /* placeholders, disabled */
-  --color-primary: #0a0a0a;              /* brand / primary action */
-  --color-primary-foreground: #fafafa;   /* text on primary */
-  --color-accent: #ebebeb;               /* hover/selected bg for subtle items */
-  --color-accent-foreground: #0a0a0a;    /* text on accent */
-  --color-destructive: #dc2626;
-  --color-destructive-foreground: #fafafa;
+
+  /* Backgrounds */
+  --color-canvas: #f3f3f3;             /* whole-page bg */
+  --color-panel: #f9f9f9;              /* cards, popovers, elevated panels */
+  --color-panel-muted: #ebebeb;        /* subtle surfaces + hover states */
+
+  /* Foreground (text) */
+  --color-fg: #0a0a0a;                 /* default text */
+  --color-fg-muted: #525252;           /* captions, labels, secondary copy */
+  --color-fg-subtle: #8a8a8a;          /* placeholders, disabled */
+  --color-fg-on-intent: #ffffff;       /* text on intent-colored surfaces */
+
+  /* Intent (brand / primary action) */
+  --color-intent: #0a0a0a;             /* primary action color */
+  --color-intent-hover: #1a1a1a;       /* hover state for intent */
+
+  /* Borders */
+  --color-stroke: #d7d7d7;             /* default border */
+  --color-stroke-strong: #bdbdbd;      /* emphasized borders, dividers */
+
+  /* Focus */
+  --color-focus: #0a0a0a;              /* focus ring color */
+
+  /* Status */
+  --color-error: #dc2626;
   --color-success: #16a34a;
-  --color-success-foreground: #fafafa;
-  --color-warning: #ca8a04;
-  --color-warning-foreground: #0a0a0a;
-  --color-ring: #0a0a0a;                 /* focus ring */
 
   /* ---------- Radius ----------
      Standard scale (xs–2xl) comes from Tailwind v4 defaults. Add semantic
@@ -92,15 +100,6 @@
   --shadow-header:
     0 8px 10px -10px rgb(0 0 0 / 0.2);
 
-  /* ---------- Back-compat aliases ----------
-     Existing components reference these names; keep them as alternate
-     handles for the semantic roles above. New code should prefer the
-     semantic names.
-     ------------------------------------------ */
-  --color-bg-elevated: var(--color-surface);
-  --color-bg-neutral-500: var(--color-neutral-500);
-  --color-grid-border: var(--color-border);
-
   /* ---------- Theme-aware decorative tokens ----------
      Used by section-pattern and [data-accent]. Override per theme so
      those utilities don't need to be rewritten in dark contexts.
@@ -116,28 +115,27 @@
    [data-theme="light"] repeats the defaults so a light island inside a
    dark ancestor forces itself back to light.
    ========================================================================== */
+[data-theme="light"],
+[data-theme="dark"] {
+  color: var(--color-fg);
+  background-color: var(--color-canvas);
+}
+
 [data-theme="light"] {
-  --color-bg: #f3f3f3;
-  --color-surface: #f9f9f9;
-  --color-surface-muted: #ebebeb;
-  --color-border: #d7d7d7;
-  --color-border-strong: #bdbdbd;
-  --color-text: #0a0a0a;
-  --color-text-muted: #525252;
-  --color-text-subtle: #8a8a8a;
-  --color-primary: #0a0a0a;
-  --color-primary-foreground: #fafafa;
-  --color-accent: #ebebeb;
-  --color-accent-foreground: #0a0a0a;
-  --color-destructive: #dc2626;
-  --color-destructive-foreground: #fafafa;
+  --color-canvas: #f3f3f3;
+  --color-panel: #f9f9f9;
+  --color-panel-muted: #ebebeb;
+  --color-fg: #0a0a0a;
+  --color-fg-muted: #525252;
+  --color-fg-subtle: #8a8a8a;
+  --color-fg-on-intent: #ffffff;
+  --color-intent: #0a0a0a;
+  --color-intent-hover: #1a1a1a;
+  --color-stroke: #d7d7d7;
+  --color-stroke-strong: #bdbdbd;
+  --color-focus: #0a0a0a;
+  --color-error: #dc2626;
   --color-success: #16a34a;
-  --color-success-foreground: #fafafa;
-  --color-warning: #ca8a04;
-  --color-warning-foreground: #0a0a0a;
-  --color-ring: #0a0a0a;
-  --color-bg-elevated: var(--color-surface);
-  --color-grid-border: var(--color-border);
   --pattern-stripe: rgb(0 0 0 / 0.08);
   --accent-line: rgb(67 57 76);
   --shadow-popover:
@@ -148,27 +146,20 @@
 }
 
 [data-theme="dark"] {
-  --color-bg: #0a0a0a;
-  --color-surface: #141414;
-  --color-surface-muted: #1f1f1f;
-  --color-border: #2a2a2a;
-  --color-border-strong: #3d3d3d;
-  --color-text: #f5f5f5;
-  --color-text-muted: #a3a3a3;
-  --color-text-subtle: #6b6b6b;
-  --color-primary: #f5f5f5;
-  --color-primary-foreground: #0a0a0a;
-  --color-accent: #1f1f1f;
-  --color-accent-foreground: #f5f5f5;
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #0a0a0a;
+  --color-canvas: #0a0a0a;
+  --color-panel: #141414;
+  --color-panel-muted: #1f1f1f;
+  --color-fg: #f5f5f5;
+  --color-fg-muted: #a3a3a3;
+  --color-fg-subtle: #6b6b6b;
+  --color-fg-on-intent: #0a0a0a;
+  --color-intent: #f5f5f5;
+  --color-intent-hover: #e5e5e5;
+  --color-stroke: #2a2a2a;
+  --color-stroke-strong: #3d3d3d;
+  --color-focus: #f5f5f5;
+  --color-error: #ef4444;
   --color-success: #22c55e;
-  --color-success-foreground: #0a0a0a;
-  --color-warning: #eab308;
-  --color-warning-foreground: #0a0a0a;
-  --color-ring: #f5f5f5;
-  --color-bg-elevated: var(--color-surface);
-  --color-grid-border: var(--color-border);
   --pattern-stripe: rgb(255 255 255 / 0.1);
   --accent-line: rgb(180 170 190);
   --shadow-popover:
@@ -188,7 +179,7 @@
    ========================================================================== */
 @layer base {
   body {
-    @apply bg-bg text-text min-h-screen;
+    @apply bg-canvas text-fg min-h-screen;
   }
   body > main {
     flex: 1 0 auto;
@@ -334,7 +325,7 @@
 
 /*
  * Diagonal-stripes background. Pair with a child that has its own
- * background (e.g. .container-large with bg-bg) — the child knocks
+ * background (e.g. .container-large with bg-canvas) — the child knocks
  * out the middle and the pattern only shows in the gutter columns.
  * Stripe color resolves from --pattern-stripe, which flips per theme.
  */

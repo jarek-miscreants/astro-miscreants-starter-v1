@@ -43,6 +43,7 @@ A practical guide to Astro 6 + Tailwind 4, written from a real learning conversa
 35. [Third-party scripts with Partytown](#35-third-party-scripts-with-partytown)
 36. [Navigation patterns — from basic nav to dropdowns + mega menus](#36-navigation-patterns--from-basic-nav-to-dropdowns--mega-menus)
 37. [Sharing config between components (Nav + Footer)](#37-sharing-config-between-components-nav--footer)
+38. [Forwarding HTML attributes on wrapper components](#38-forwarding-html-attributes-on-wrapper-components)
 
 ---
 
@@ -1876,11 +1877,11 @@ Tailwind 4 changed how dark mode works compared to v3. The old `darkMode: 'class
 
 Three layers, same shape as fluid type:
 
-1. **Semantic tokens** (`--color-bg`, `--color-fg`, `--color-border`, `--color-primary`...) — the *role*, not the value. Components only use these.
+1. **Semantic tokens** (`--color-bg`, `--color-fg`, `--color-border`, `--color-intent`...) — the *role*, not the value. Components only use these.
 2. **Theme definitions** — light and dark each redefine the semantic tokens to point at different raw values.
 3. **A switch mechanism** — system preference, a class on `<html>`, or both.
 
-The mistake to avoid: writing `bg-zinc-900` in a Card component. If you do that, switching themes is 500 search-and-replaces. Write `bg-bg-elevated` instead and switching themes is one place.
+The mistake to avoid: writing `bg-zinc-900` in a Card component. If you do that, switching themes is 500 search-and-replaces. Write `bg-panel` instead and switching themes is one place.
 
 ### Step 1 — Semantic tokens in `@theme`
 
@@ -1898,14 +1899,14 @@ The mistake to avoid: writing `bg-zinc-900` in a Card component. If you do that,
   --color-border:        #e5e7eb;
   --color-border-strong: #d1d5db;
 
-  --color-primary:    #6366f1;
-  --color-primary-fg: #ffffff;     /* text ON primary */
+  --color-intent:    #6366f1;
+  --color-fg-on-intent: #ffffff;     /* text ON primary */
 }
 ```
 
-These auto-generate utilities: `bg-bg`, `bg-bg-elevated`, `text-fg`, `text-fg-muted`, `border-border`, `bg-primary`, `text-primary-fg`. Tailwind strips the `--color-` prefix when generating the utility name.
+These auto-generate utilities: `bg-canvas`, `bg-panel`, `text-fg`, `text-fg-muted`, `border-stroke`, `bg-intent`, `text-fg-on-intent`. Tailwind strips the `--color-` prefix when generating the utility name.
 
-**Always pair backgrounds with foregrounds.** `--color-primary` + `--color-primary-fg` lets you write `bg-primary text-primary-fg` and never wonder which text color contrasts with the brand.
+**Always pair backgrounds with foregrounds.** `--color-intent` + `--color-fg-on-intent` lets you write `bg-intent text-fg-on-intent` and never wonder which text color contrasts with the brand.
 
 ### Step 2 — Pick a switching pattern
 
@@ -1921,8 +1922,8 @@ Three options. They stack — pick the one that matches your needs.
     --color-fg:           #fafafa;
     --color-fg-muted:     #a1a1aa;
     --color-border:       #27272a;
-    --color-primary:      #818cf8;
-    --color-primary-fg:   #0a0a0a;
+    --color-intent:      #818cf8;
+    --color-fg-on-intent:   #0a0a0a;
   }
 }
 ```
@@ -1947,8 +1948,8 @@ That registers a `dark:` variant that activates when an ancestor has `.dark`. Th
   --color-bg-elevated: #18181b;
   --color-fg:          #fafafa;
   --color-border:      #27272a;
-  --color-primary:     #818cf8;
-  --color-primary-fg:  #0a0a0a;
+  --color-intent:     #818cf8;
+  --color-fg-on-intent:  #0a0a0a;
 }
 ```
 
@@ -2027,10 +2028,10 @@ Without this, scrollbars and `<input>` controls stay light even when your CSS go
 Once tokens are defined, components don't think about themes:
 
 ```astro
-<article class="bg-bg-elevated text-fg border border-border rounded-lg p-6">
+<article class="bg-panel text-fg border border-stroke rounded-lg p-6">
   <h3 class="h3 text-fg">Card title</h3>
   <p class="text-body-md text-fg-muted">Subtitle</p>
-  <button class="bg-primary text-primary-fg px-4 py-2 rounded">
+  <button class="bg-intent text-fg-on-intent px-4 py-2 rounded">
     Action
   </button>
 </article>
@@ -2056,7 +2057,7 @@ Once tokens are defined, components don't think about themes:
     root.classList.add(isDark ? 'light' : 'dark');
     localStorage.setItem('theme', isDark ? 'light' : 'dark');
   "
-  class="p-2 rounded-md hover:bg-bg-elevated"
+  class="p-2 rounded-md hover:bg-panel"
 >
   <Icon name="lucide:sun" class="w-5 h-5 hidden dark:block" />
   <Icon name="lucide:moon" class="w-5 h-5 block dark:hidden" />
@@ -2069,7 +2070,7 @@ For a three-state toggle (`auto` / `light` / `dark`), use a small dropdown or se
 
 1. **Don't put theme overrides inside `@theme`.** `@theme` is the defaults block. Overrides are regular CSS that redeclares the variables on `:root`, `.dark`, etc.
 2. **`@custom-variant dark` is required.** Without it, the `dark:` variant doesn't exist in v4. (In v3 it was implicit; v4 made it opt-in.)
-3. **Always pair backgrounds with foregrounds.** Without `--color-primary-fg`, you'll guess text colors per component and get inconsistencies.
+3. **Always pair backgrounds with foregrounds.** Without `--color-fg-on-intent`, you'll guess text colors per component and get inconsistencies.
 4. **Test contrast in both themes.** A `--color-fg-muted` that passes WCAG AA on white might fail on near-black.
 5. **Don't reference raw palette names in components.** No `bg-zinc-900 dark:bg-zinc-100`. That defeats the entire point — go through semantic tokens.
 
@@ -2078,9 +2079,9 @@ For a three-state toggle (`auto` / `light` / `dark`), use a small dropdown or se
 The same pattern handles brand themes, customer themes, etc. Just stack classes:
 
 ```css
-:root.theme-ocean       { --color-primary: #0ea5e9; --color-bg: #f0f9ff; }
-:root.theme-forest      { --color-primary: #16a34a; --color-bg: #f0fdf4; }
-:root.theme-ocean.dark  { --color-primary: #38bdf8; --color-bg: #082f49; }
+:root.theme-ocean       { --color-intent: #0ea5e9; --color-bg: #f0f9ff; }
+:root.theme-forest      { --color-intent: #16a34a; --color-bg: #f0fdf4; }
+:root.theme-ocean.dark  { --color-intent: #38bdf8; --color-bg: #082f49; }
 ```
 
 Two orthogonal axes (brand × light/dark) compose by stacking classes on `<html>`. Same toggle pattern, same FOUC prevention, same component code.
@@ -2178,11 +2179,11 @@ This is where the system actually lives. Components use these names.
   --color-divider:       var(--color-neutral-100);
 
   /* ---------- BRAND ROLES ---------- */
-  --color-primary:        var(--color-brand-600);
-  --color-primary-hover:  var(--color-brand-700);
-  --color-primary-active: var(--color-brand-800);
-  --color-primary-soft:   var(--color-brand-50);
-  --color-primary-fg:     #ffffff;
+  --color-intent:        var(--color-brand-600);
+  --color-intent-hover:  var(--color-brand-700);
+  --color-intent-active: var(--color-brand-800);
+  --color-intent-soft:   var(--color-brand-50);
+  --color-fg-on-intent:     #ffffff;
 
   /* ---------- STATUS ---------- */
   --color-success:      var(--color-emerald-600);
@@ -2206,17 +2207,17 @@ This is where the system actually lives. Components use these names.
 In components:
 
 ```astro
-<div class="bg-bg-elevated text-fg border border-border rounded-lg p-6">
+<div class="bg-panel text-fg border border-stroke rounded-lg p-6">
   <h3 class="text-fg">Card title</h3>
   <p class="text-fg-muted">Subtitle</p>
-  <button class="bg-primary text-primary-fg hover:bg-primary-hover px-4 py-2">
+  <button class="bg-intent text-fg-on-intent hover:bg-intent-hover px-4 py-2">
     Action
   </button>
   <span class="bg-success-soft text-success px-2 py-1 rounded">Saved</span>
 </div>
 ```
 
-**Zero references to `brand-600` or `neutral-200`.** All meaning, no raw palette. If you switch `--color-primary` to point at `--color-accent-600` tomorrow, every primary button updates instantly.
+**Zero references to `brand-600` or `neutral-200`.** All meaning, no raw palette. If you switch `--color-intent` to point at `--color-accent-600` tomorrow, every primary button updates instantly.
 
 ### Step 3 — The naming taxonomy
 
@@ -2255,16 +2256,16 @@ Theme overrides redeclare *semantic tokens*, **not primitives**. The ramps stay 
 
   --color-bg:         var(--color-neutral-50);
   --color-fg:         var(--color-neutral-900);
-  --color-primary:    var(--color-brand-600);
-  --color-primary-fg: #ffffff;
+  --color-intent:    var(--color-brand-600);
+  --color-fg-on-intent: #ffffff;
 }
 
 /* Dark theme — same ramps, different mappings */
 :root.dark {
   --color-bg:         var(--color-neutral-950);
   --color-fg:         var(--color-neutral-50);
-  --color-primary:    var(--color-brand-400);   /* lighter for dark bg */
-  --color-primary-fg: var(--color-neutral-950);
+  --color-intent:    var(--color-brand-400);   /* lighter for dark bg */
+  --color-fg-on-intent: var(--color-neutral-950);
 }
 ```
 
@@ -2356,7 +2357,7 @@ Two patterns, both useful:
 
 #### Pattern A — Tailwind's slash syntax
 
-Tailwind v4 lets you do `bg-primary/20`, `text-fg/50`, `border-border/30` out of the box. Works with any color token, including yours. Use this for one-offs.
+Tailwind v4 lets you do `bg-intent/20`, `text-fg/50`, `border-stroke/30` out of the box. Works with any color token, including yours. Use this for one-offs.
 
 #### Pattern B — Dedicated alpha tokens
 
@@ -2386,8 +2387,8 @@ Tip: store base color components separately so you can compose alphas dynamicall
 
 1. **Don't put semantic tokens in components, then realize you need primitives.** Build primitives first, semantics second, components third. Going backwards is painful.
 2. **Don't name semantic tokens after colors.** `--color-blue` for a primary action is a trap — what happens when the brand changes to green? Always name by *role*, never by hue.
-3. **Don't skip the `-fg` pair tokens.** If you only define `--color-primary` and not `--color-primary-fg`, every component author guesses. They will guess differently. You will end up with white-text-on-yellow somewhere.
-4. **Don't mix systems mid-component.** Either a component uses semantic tokens or it uses primitives — not both. Mixing leads to "this is `bg-bg-elevated` but the border is `border-zinc-300`" inconsistencies that survive theme changes and break.
+3. **Don't skip the `-fg` pair tokens.** If you only define `--color-intent` and not `--color-fg-on-intent`, every component author guesses. They will guess differently. You will end up with white-text-on-yellow somewhere.
+4. **Don't mix systems mid-component.** Either a component uses semantic tokens or it uses primitives — not both. Mixing leads to "this is `bg-panel` but the border is `border-zinc-300`" inconsistencies that survive theme changes and break.
 5. **Don't forget hover/active/focus.** A `primary` token without `primary-hover` means every developer reaches for `hover:bg-brand-700` and you're back to primitives in components.
 6. **Don't try to make every color a token.** One-off illustration colors, decorative gradients, marketing-page hero accents — these can stay as raw values or arbitrary classes. Tokens are for *system* colors, not *content* colors.
 
@@ -3184,7 +3185,7 @@ const faqs = (await getCollection("faq"))
   {faqs.map(async (faq) => {
     const { Content } = await render(faq);
     return (
-      <div data-accordion="item" class="bg-bg">
+      <div data-accordion="item" class="bg-canvas">
         <button data-accordion="button" class="flex w-full items-center justify-between px-6 py-5 cursor-pointer text-left">
           <span class="h5">{faq.data.question}</span>
           <Icon data-accordion="icon" name="lucide:chevron-down" class="w-5 h-5 text-gray-500 shrink-0" aria-hidden="true" />
@@ -4500,14 +4501,14 @@ const legalLinks: SiteLink[] = [
 const copyright = "© 2026 Miscreants";
 ---
 
-<footer class="border-t border-border py-16">
+<footer class="border-t border-stroke py-16">
   <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
     <div>
       <h3 class="font-semibold mb-3">Product</h3>
       <ul class="flex flex-col gap-2">
         {topLinks.map((link) => (
           <li>
-            <a href={link.href} class="text-text-muted hover:text-text">
+            <a href={link.href} class="text-fg-muted hover:text-fg">
               {link.label}
             </a>
           </li>
@@ -4520,7 +4521,7 @@ const copyright = "© 2026 Miscreants";
       <ul class="flex flex-col gap-2">
         {companyLinks.map((link) => (
           <li>
-            <a href={link.href} class="text-text-muted hover:text-text">
+            <a href={link.href} class="text-fg-muted hover:text-fg">
               {link.label}
             </a>
           </li>
@@ -4533,7 +4534,7 @@ const copyright = "© 2026 Miscreants";
       <ul class="flex flex-col gap-2">
         {legalLinks.map((link) => (
           <li>
-            <a href={link.href} class="text-text-muted hover:text-text">
+            <a href={link.href} class="text-fg-muted hover:text-fg">
               {link.label}
             </a>
           </li>
@@ -4542,7 +4543,7 @@ const copyright = "© 2026 Miscreants";
     </div>
   </div>
 
-  <p class="mt-8 text-sm text-text-subtle">{copyright}</p>
+  <p class="mt-8 text-sm text-fg-subtle">{copyright}</p>
 </footer>
 ```
 
@@ -4595,3 +4596,165 @@ This starter kept Nav inline because:
 3. When the Footer lands, we'll extract whatever actually overlaps. Not the whole nav config — just the overlap.
 
 **The general principle:** prefer inline until a second consumer shows up. Then extract exactly what's shared, not more. Resist the urge to invent a "nice architecture" ahead of the actual need. Premature abstraction is just as expensive as premature optimization.
+
+---
+
+## 38. Forwarding HTML attributes on wrapper components
+
+One of the most confusing Astro quirks: you write a custom component, pass it `data-theme="dark"` (or `id="hero"`, or `aria-labelledby="..."`), and nothing happens. No error, no warning — the attribute is just silently dropped.
+
+This section explains why, how to fix it, and when you should *not* bother.
+
+### The problem in one example
+
+Say you have this wrapper component:
+
+```astro
+---
+// src/components/Section.astro
+interface Props {
+  padding?: "sm" | "md" | "lg";
+}
+const { padding = "md" } = Astro.props;
+---
+
+<section class={`py-${padding === "sm" ? 8 : padding === "lg" ? 24 : 16}`}>
+  <slot />
+</section>
+```
+
+Now a caller writes:
+
+```astro
+<Section id="hero" data-theme="dark" aria-labelledby="heading-1">
+  <h2 id="heading-1">Welcome</h2>
+</Section>
+```
+
+The caller expects that `<section>` in the DOM to have `id="hero"`, `data-theme="dark"`, and `aria-labelledby="heading-1"`. None of them appear. The rendered HTML is:
+
+```html
+<section class="py-16">
+  <h2 id="heading-1">Welcome</h2>
+</section>
+```
+
+Three attributes: gone.
+
+### Why Astro does this
+
+Astro components are **opt-in passthrough**. Props come in via `Astro.props`, and the component author decides what to do with them. Anything not explicitly rendered never reaches the DOM.
+
+Contrast with other frameworks:
+- **Vue**: opt-*out*. Unknown attributes cascade to the root element unless you set `inheritAttrs: false`.
+- **React**: opt-*in*, like Astro. You have to spread `{...rest}` yourself.
+- **Plain HTML**: the browser always keeps attributes the author wrote.
+
+Astro's choice makes sense for safety: a parent passing `style="color: red"` or `class="broken"` shouldn't accidentally blow up a child component's own styling. But it surprises newcomers every time — especially when debugging a theme toggle, a test harness attribute, or an aria hook that looks fine in the source but isn't in the DOM.
+
+### The fix: extend `HTMLAttributes` and spread the rest
+
+Two changes to your component:
+
+```astro
+---
+// src/components/Section.astro
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"section"> {   // ← 1
+  padding?: "sm" | "md" | "lg";
+}
+
+const {
+  padding = "md",
+  class: className,                                    // ← optional: handle class explicitly
+  ...rest                                              // ← 2a: capture the rest
+} = Astro.props;
+---
+
+<section {...rest} class:list={[className, `py-${padding === "sm" ? 8 : padding === "lg" ? 24 : 16}`]}>
+  <slot />
+</section>
+```
+
+**What each piece does:**
+
+1. **`extends HTMLAttributes<"section">`** tells TypeScript that this component accepts everything a real `<section>` accepts — `id`, `class`, `style`, `data-*`, `aria-*`, event handlers, and so on. Without this, `<Section id="..." aria-labelledby="...">` would get a "property does not exist on type Props" squiggle from the editor.
+
+2. **`...rest` in destructuring** collects every prop you didn't explicitly name. `padding` is yours; `id`, `data-theme`, `aria-labelledby` all end up in `rest`.
+
+3. **`{...rest}` on the `<section>`** spreads those collected attributes onto the rendered element. Now every HTML attribute the caller wrote lands on the DOM.
+
+**Why `class: className` is usually handled separately:** `class` is a reserved word in JavaScript, so you can't just `{ class }`. Rename with `class: className`, then put it in `class:list` alongside your component's own classes. If you leave it in `...rest`, Astro will put it on the element but overwrite any classes the component itself wanted.
+
+### What about typing data-* attributes?
+
+`HTMLAttributes` includes an index signature for `data-*` and `aria-*`, so these all type-check out of the box:
+
+```astro
+<Section data-theme="dark" data-analytics-id="hero-01" aria-labelledby="h1" />
+```
+
+No `[key: string]: any` hacks required.
+
+### Test it yourself
+
+Before the fix, open devtools and inspect the `<section>`. Attribute missing.
+
+After the fix, same inspection. Attribute present. This is the entire mechanism — one type import, one `...rest` capture, one spread.
+
+### When to add this, when not
+
+**Add passthrough to:**
+- **Layout wrappers** — `Section`, `Container`, `Grid`, `Stack`, `Flex`, anything that's basically "a styled `<div>` or `<section>`". These are exactly the places callers want to set `id` for anchor links, `data-theme` for scoped dark mode, `aria-labelledby` for landmark semantics, etc.
+- **Generic cards** — `Card`, `Panel`. Same reasoning.
+
+**Skip it on:**
+- **Curated primitives** — `Button`, `Input`, icon wrappers. You've deliberately chosen which attrs are meaningful (`href`, `disabled`, `type`). Exposing *all* native attrs blurs the contract and invites callers to pass `style="..."` or `onclick="..."` where the component has its own opinion.
+- **Components with their own markup contract** — `Accordion`, `Tabs`, `Nav`. They own the internal structure; forwarding an arbitrary `id` to "whichever root they render" is usually noise and can conflict with the IDs the component generates internally.
+- **Tiny display components** — `Logo`, `Badge`. No call site needs arbitrary passthrough; the footprint isn't worth it.
+
+**Rule of thumb:** if the component is "a `<div>` / `<section>` with slots and some classes," add passthrough. If it owns behavior (keyboard nav, dynamic state, curated API), keep it closed.
+
+### A real example
+
+When I wanted a section-scoped dark mode with `<SectionMain data-theme="dark">`, nothing happened. The `data-theme` attribute never reached the rendered `<section>`. The fix was exactly the pattern above:
+
+```astro
+---
+// src/components/SectionMain.astro
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"section"> {
+  padding?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
+  // ... other custom props ...
+}
+
+const {
+  padding = "md",
+  // ... other destructured props ...
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+<section {...rest} class:list={["section-grid-outside", borderTop && "border-t border-stroke", className]}>
+  <!-- ... -->
+</section>
+```
+
+After that change, `<SectionMain data-theme="dark">` actually wrote `data-theme="dark"` to the DOM, the CSS vars inside the scope re-resolved to dark values, and the whole section flipped without touching any other component.
+
+### The combined mental model
+
+The passthrough pattern is one of three layers that together make feature-rich wrapper components:
+
+| Layer            | What it does                                           | Where             |
+|------------------|--------------------------------------------------------|-------------------|
+| **Type surface** | `extends HTMLAttributes<"section">` adds native attrs  | Component frontmatter |
+| **Data capture** | `...rest` collects unspecified props                   | Component frontmatter |
+| **DOM landing**  | `{...rest}` on the rendered element                    | Component template |
+
+Miss any one of them and the pattern doesn't work. Type surface without capture: TypeScript is happy but the attrs still vanish. Capture without spread: attrs sit unused in a variable. Spread without type surface: the editor underlines the caller.
+
+Once you internalize the pattern, you'll reach for it instinctively on every new wrapper component — and stop being surprised that `id` and `data-*` "don't work" on your custom components.

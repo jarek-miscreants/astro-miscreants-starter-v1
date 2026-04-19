@@ -39,9 +39,9 @@ Variants map to semantic theme tokens defined in `src/styles/global.css`:
 
 | Variant     | Background                 | Text                      | Border                   | Intended use              |
 |-------------|----------------------------|---------------------------|--------------------------|---------------------------|
-| `primary`   | `bg-primary`               | `text-primary-foreground` | —                        | Main CTA                  |
-| `secondary` | `bg-transparent` (+ accent on hover) | `text-text`    | `border-border`          | Supporting CTA            |
-| `tertiary`  | `bg-transparent` (+ accent on hover) | `text-text`    | —                        | Inline / de-emphasized    |
+| `primary`   | `bg-intent`               | `text-fg-on-intent` | —                        | Main CTA                  |
+| `secondary` | `bg-transparent` (+ panel-muted on hover) | `text-fg`    | `border-stroke`          | Supporting CTA            |
+| `tertiary`  | `bg-transparent` (+ panel-muted on hover) | `text-fg`    | —                        | Inline / de-emphasized    |
 
 Because every color resolves to a CSS variable, the same button flips when an ancestor is marked `[data-theme="dark"]`.
 
@@ -68,7 +68,7 @@ When the caller passes `target="_blank"` without an explicit `rel`, the componen
 
 ### Focus ring
 
-`focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg` uses `--color-ring` (which flips per theme) and offsets against `--color-bg` so the ring stays visible on any section background.
+`focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas` uses `--color-focus` (which flips per theme) and offsets against `--color-canvas` so the ring stays visible on any section background.
 
 ## Usage
 
@@ -104,4 +104,4 @@ import Button from "../components/Button.astro";
 - The icon system is `astro-icon` with `@iconify-json/lucide`. Swapping to a different icon set means changing the two `<Icon name="..." />` calls.
 - The `class` prop is merged last via `class:list`, so callers can override spacing, width, or any non-color utility without touching the component. Color-related overrides are better done through the variant / token system.
 - If you need a fourth variant, add it to both the `variant` prop union and the `variants` map — no CSS edits required, as the map uses existing theme tokens.
-- For buttons sitting on a dark section (e.g., inside `[data-theme="dark"]`), the ring offset automatically uses the section's dark `--color-bg`, so the ring stays visible without any variant-specific tweaks.
+- For buttons sitting on a dark section (e.g., inside `[data-theme="dark"]`), the ring offset automatically uses the section's dark `--color-canvas`, so the ring stays visible without any variant-specific tweaks.

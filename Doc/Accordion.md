@@ -1,10 +1,11 @@
-# Accordion
+# Accordion (primitive)
 
 **File:** `src/components/Accordion.astro`
+**Preset:** see [`AccordionFAQ`](./AccordionFAQ.md) for the common question/answer use case.
 
 ## What it does
 
-A disclosure component that shows/hides content panels. Supports single or multiple open items, optional default-open state, and full keyboard navigation.
+A low-level disclosure primitive. The component provides behavior only — state management, ARIA wiring, keyboard navigation, height animation — and the caller provides the markup for each item via a data-attribute contract. Use this when you need full control over how items look (rich content, icons, buttons, videos inside the answer, custom typography). For simple FAQ lists, use `AccordionFAQ` instead.
 
 ## Props
 
@@ -15,37 +16,49 @@ A disclosure component that shows/hides content panels. Supports single or multi
 | `openByDefault`     | `number`  | —       | 1-based index of the item to open on page load        |
 | `class`             | `string`  | —       | Additional classes on the wrapper                     |
 
-## How it works
+## Markup contract
 
-### HTML structure (required in your slot content)
-
-The component expects this data-attribute structure in its children:
+The component expects this structure in its slot content:
 
 ```html
 <div data-accordion="item">
-  <div data-accordion="button">Trigger text</div>
+  <button type="button" data-accordion="button">
+    Trigger text
+    <svg data-accordion="icon"></svg>    <!-- optional -->
+  </button>
   <div data-accordion="content">
-    <div>Hidden content goes here</div>
+    <div>Hidden content here</div>       <!-- single wrapper -->
   </div>
 </div>
 ```
 
+### Why `<button>` and not `<div>`
+
+`[data-accordion="button"]` **should be a native `<button>` element**. Native buttons are focusable and activatable by default, receive the correct accessible name from their visible text, and fire click on Enter and Space without extra wiring. The script applies ARIA attributes and a roving tabindex on whatever element you provide, but it does not re-implement platform focus semantics — a `<div>` with `role="button"` works, but is fragile and fails silently for users on platforms or with assistive tech that rely on native semantics.
+
+### Content wrapper requirement
+
+The content div must have **exactly one direct child wrapper**. The grid-row animation sets `min-height: 0` on `[data-accordion="content"] > *` so it can collapse to zero; if you put two siblings directly inside, margins can collapse oddly mid-animation. Always wrap your content in one `<div>`.
+
+## How it works
+
 ### Animation
 
-- Uses a **CSS grid trick** for height animation: `grid-template-rows` transitions from `0fr` to `1fr`.
-- No JS height calculations needed — the browser handles it natively.
-- An optional `[data-accordion="icon"]` element rotates 180 degrees when active.
+- Uses a **CSS grid trick** for height animation: `grid-template-rows` transitions from `minmax(0, 0fr)` to `minmax(0, 1fr)`.
+- No JS height calculations — the browser measures.
+- An optional `[data-accordion="icon"]` element rotates 180° when active.
+- Respects `prefers-reduced-motion: reduce` — both height and icon transitions are disabled.
 
-### ARIA & Accessibility
+### ARIA & accessibility
 
-- Each button gets `role="button"`, `aria-expanded`, `aria-controls`, and dynamically generated IDs.
-- Each content region gets `role="region"` and `aria-labelledby` pointing back to its button.
-- Keyboard navigation: Arrow Up/Down moves focus between buttons, Home/End jump to first/last, Enter/Space toggles.
-- Uses roving `tabindex` — only the focused button has `tabindex="0"`, others have `tabindex="-1"`.
+- Each button receives `role="button"`, `aria-expanded`, `aria-controls`, and a generated `id`.
+- Each content region receives `role="region"` and `aria-labelledby` pointing at its button.
+- Keyboard: ArrowUp/Down moves focus between buttons, Home/End jump to first/last, Enter/Space toggles.
+- Roving `tabindex` — only the focused button has `tabindex="0"`, others are `-1`.
 
 ### Script initialization
 
-- Uses `data-script-initialized` to prevent double-initialization on Astro page transitions.
+- `data-script-initialized` guards against double-initialization across Astro view transitions.
 
 ## Usage
 
@@ -56,22 +69,22 @@ import Accordion from "../components/Accordion.astro";
 
 <Accordion closePrevious={true} openByDefault={1}>
   <div data-accordion="item">
-    <div data-accordion="button" class="flex justify-between py-4 cursor-pointer">
-      <span>Question 1</span>
+    <button type="button" data-accordion="button" class="flex justify-between w-full py-4">
+      <span>What is Astro?</span>
       <svg data-accordion="icon" class="w-4 h-4">...</svg>
-    </div>
+    </button>
     <div data-accordion="content">
-      <div class="pb-4">Answer to question 1.</div>
+      <div class="pb-4 text-fg-muted">A web framework for content-driven websites.</div>
     </div>
   </div>
 
   <div data-accordion="item">
-    <div data-accordion="button" class="flex justify-between py-4 cursor-pointer">
-      <span>Question 2</span>
+    <button type="button" data-accordion="button" class="flex justify-between w-full py-4">
+      <span>How does it compare to Next.js?</span>
       <svg data-accordion="icon" class="w-4 h-4">...</svg>
-    </div>
+    </button>
     <div data-accordion="content">
-      <div class="pb-4">Answer to question 2.</div>
+      <div class="pb-4 text-fg-muted">Astro ships less JavaScript by default. Next.js is better for app-like UIs.</div>
     </div>
   </div>
 </Accordion>
@@ -79,5 +92,6 @@ import Accordion from "../components/Accordion.astro";
 
 ## Notes
 
-- The content div inside `[data-accordion="content"]` **must have a single child wrapper** for the grid animation to work (`min-height: 0` is applied to direct children).
-- Styles are `is:global` because the data-attribute selectors need to reach into slot content.
+- **Nested accordions** are not supported — the component queries all descendant `[data-accordion="item"]` elements, so an inner accordion's items leak into the outer's keyboard handler. Avoid.
+- Styles use `is:global` because the data-attribute selectors need to reach into slot content.
+- For a typed, mapped API over FAQ-style data, use [`AccordionFAQ`](./AccordionFAQ.md).

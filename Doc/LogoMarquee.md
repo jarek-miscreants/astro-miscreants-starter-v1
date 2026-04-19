@@ -27,7 +27,7 @@ import LogoMarquee from "../components/LogoMarquee.astro";
 import Logo from "../components/Logo.astro";
 ---
 
-<LogoMarquee class="border-t border-grid-border py-6">
+<LogoMarquee class="border-t border-stroke py-6">
   <img src="/logos/company-1.svg" alt="Company 1" class="h-6 w-auto" />
   <img src="/logos/company-2.svg" alt="Company 2" class="h-6 w-auto" />
   <img src="/logos/company-3.svg" alt="Company 3" class="h-6 w-auto" />
@@ -40,4 +40,4 @@ import Logo from "../components/Logo.astro";
 - You need enough child elements to fill the container width, otherwise the gap between the two sets will be visible.
 - The slot is duplicated in the HTML, so each child element will appear in the DOM twice.
 - The animation is pure CSS (no JS). Speed is controlled by the `marquee` keyframes in `global.css` (currently 30s).
-- The "Trusted by" label has a `bg-bg` background to punch through any border it overlaps — it assumes the page background matches `--color-bg`.
+- The "Trusted by" label has a `bg-canvas` background to punch through any border it overlaps — it assumes the page background matches `--color-canvas`.

@@ -1,8 +1,9 @@
 ---
+import type { HTMLAttributes } from "astro/types";
+
 type PadSize = "none" | "xs" | "sm" | "md" | "lg" | "xl";
 
-interface Props {
-  id?: string;
+interface Props extends HTMLAttributes<"section"> {
   padding?: PadSize;            // shorthand for both
   paddingTop?: PadSize;         // overrides top
   paddingBottom?: PadSize;      // overrides bottom
@@ -11,13 +12,14 @@ interface Props {
   borderTop?: boolean;
 }
 const {
-  id,
   padding = "md",
   paddingTop,
   paddingBottom,
   contentPadding = "default",
   contentClass = "",
   borderTop = false,
+  class: className,
+  ...rest
 } = Astro.props;
 
 const top = paddingTop ?? padding;
@@ -39,12 +41,12 @@ const contentPaddingClass = {
 ---
 
 <section
-  id={id}
-  class:list={["section-grid-outside ", borderTop && "border-t border-grid-border"]}
+  {...rest}
+  class:list={["section-grid-outside", borderTop && "border-t border-stroke", className]}
 >
-  <div class="section-pattern relative col-start-2 border-x border-grid-border" aria-hidden="true"></div>
+  <div class="section-pattern relative col-start-2 border-x border-stroke" aria-hidden="true"></div>
   <div class:list={[ptClass, pbClass, "col-start-3 flex flex-col relative", contentPaddingClass, contentClass]}>
     <slot />
   </div>
-  <div class="section-pattern col-start-4 border-x border-grid-border" aria-hidden="true"></div>
+  <div class="section-pattern col-start-4 border-x border-stroke" aria-hidden="true"></div>
 </section>

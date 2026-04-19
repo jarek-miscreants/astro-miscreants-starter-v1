@@ -86,21 +86,21 @@ const megaLinks = links.filter(
 
   <div
     data-nav-bar
-    class="col-span-full relative md:col-span-1 md:col-start-3 flex h-14 items-center justify-between border border-border bg-surface/0 transition-all duration-300"
+    class="col-span-full relative md:col-span-1 md:col-start-3 flex h-14 items-center justify-between border border-stroke bg-panel/0 transition-all duration-300"
   >
     <div data-accent="tl"></div><div data-accent="tr"></div>
     <div data-accent="bl"></div><div data-accent="br"></div>
 
     <a
       href={homeHref}
-      class="flex items-center px-2 text-text transition hover:text-primary"
+      class="flex items-center px-2 text-fg transition hover:text-intent"
       aria-label="Home"
     >
       <Logo class="h-5 w-auto" />
     </a>
 
     <nav
-      class="hidden self-stretch text-sm text-text-muted md:flex"
+      class="hidden self-stretch text-sm text-fg-muted md:flex"
       aria-label="Primary"
     >
       {
@@ -115,7 +115,7 @@ const megaLinks = links.filter(
                   aria-haspopup={isMenu ? "menu" : "true"}
                   aria-controls={`nav-panel-${link.id}`}
                   aria-expanded="false"
-                  class="flex h-full items-center gap-1 px-4 transition hover:text-text focus-visible:text-text outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+                  class="flex h-full items-center gap-1 px-4 transition hover:text-fg focus-visible:text-fg outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
                 >
                   {link.label}
                   <Icon
@@ -134,12 +134,12 @@ const megaLinks = links.filter(
                     aria-labelledby={`nav-panel-${link.id}`}
                     class="absolute left-0 top-full hidden min-w-56 pt-2"
                   >
-                    <div class="border border-border bg-surface p-2 shadow-popover">
+                    <div class="border border-stroke bg-panel p-2 shadow-popover">
                       {link.items.map((item) => (
                         <a
                           href={item.href}
                           role="menuitem"
-                          class="block px-3 py-2 text-text-muted transition hover:bg-accent hover:text-text focus-visible:bg-accent focus-visible:text-text outline-none"
+                          class="block px-3 py-2 text-fg-muted transition hover:bg-panel-muted hover:text-fg focus-visible:bg-panel-muted focus-visible:text-fg outline-none"
                         >
                           {item.label}
                         </a>
@@ -155,7 +155,7 @@ const megaLinks = links.filter(
           return (
             <a
               href={plain.href}
-              class="flex h-full items-center px-4 transition hover:text-text focus-visible:text-text outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+              class="flex h-full items-center px-4 transition hover:text-fg focus-visible:text-fg outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
             >
               {plain.label}
             </a>
@@ -173,7 +173,7 @@ const megaLinks = links.filter(
         aria-label="Open menu"
         aria-expanded="false"
         aria-controls="nav-mobile-panel"
-        class="ml-1 grid h-9 w-9 place-items-center border border-border text-text-muted transition hover:border-border-strong hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg md:hidden"
+        class="ml-1 grid h-9 w-9 place-items-center border border-stroke text-fg-muted transition hover:border-stroke-strong hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas md:hidden"
       >
         <svg
           class="h-4 w-4"
@@ -202,11 +202,11 @@ const megaLinks = links.filter(
         aria-label={`${link.label} menu`}
         class="col-span-full md:col-span-1 md:col-start-3 hidden pt-2"
       >
-        <div class="border border-border bg-surface p-8 shadow-popover">
+        <div class="border border-stroke bg-panel p-8 shadow-popover">
           <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
             {link.columns.map((column) => (
               <div>
-                <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-text-subtle">
+                <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-fg-subtle">
                   {column.heading}
                 </h3>
                 <ul class="flex flex-col gap-1">
@@ -214,11 +214,11 @@ const megaLinks = links.filter(
                     <li>
                       <a
                         href={item.href}
-                        class="block px-3 py-2 transition hover:bg-accent focus-visible:bg-accent outline-none"
+                        class="block px-3 py-2 transition hover:bg-panel-muted focus-visible:bg-panel-muted outline-none"
                       >
-                        <div class="text-sm text-text">{item.label}</div>
+                        <div class="text-sm text-fg">{item.label}</div>
                         {item.description && (
-                          <div class="text-xs text-text-muted">{item.description}</div>
+                          <div class="text-xs text-fg-muted">{item.description}</div>
                         )}
                       </a>
                     </li>
@@ -238,7 +238,7 @@ const megaLinks = links.filter(
     data-nav-mobile
     class="col-span-full md:hidden mt-2 hidden overflow-hidden px-4"
   >
-    <div class=" border border-border bg-surface p-4 shadow-popover">
+    <div class=" border border-stroke bg-panel p-4 shadow-popover">
       <nav class="flex flex-col gap-1 text-sm" aria-label="Mobile primary">
         {
           links.map((link) => {
@@ -246,7 +246,7 @@ const megaLinks = links.filter(
               return (
                 <a
                   href={link.href}
-                  class="block  px-3 py-2 text-text-muted transition hover:bg-accent hover:text-text"
+                  class="block  px-3 py-2 text-fg-muted transition hover:bg-panel-muted hover:text-fg"
                 >
                   {link.label}
                 </a>
@@ -256,7 +256,7 @@ const megaLinks = links.filter(
             if (link.type === "menu") {
               return (
                 <details class="group">
-                  <summary class="flex cursor-pointer list-none items-center justify-between  px-3 py-2 text-text-muted transition hover:bg-accent hover:text-text">
+                  <summary class="flex cursor-pointer list-none items-center justify-between  px-3 py-2 text-fg-muted transition hover:bg-panel-muted hover:text-fg">
                     <span>{link.label}</span>
                     <Icon
                       name="lucide:chevron-down"
@@ -264,11 +264,11 @@ const megaLinks = links.filter(
                       aria-hidden="true"
                     />
                   </summary>
-                  <div class="mt-1 ml-3 flex flex-col gap-0.5 border-l border-border pl-3">
+                  <div class="mt-1 ml-3 flex flex-col gap-0.5 border-l border-stroke pl-3">
                     {link.items.map((item) => (
                       <a
                         href={item.href}
-                        class="block  px-3 py-2 text-text-muted transition hover:bg-accent hover:text-text"
+                        class="block  px-3 py-2 text-fg-muted transition hover:bg-panel-muted hover:text-fg"
                       >
                         {item.label}
                       </a>
@@ -280,7 +280,7 @@ const megaLinks = links.filter(
 
             return (
               <details class="group">
-                <summary class="flex cursor-pointer list-none items-center justify-between  px-3 py-2 text-text-muted transition hover:bg-accent hover:text-text">
+                <summary class="flex cursor-pointer list-none items-center justify-between  px-3 py-2 text-fg-muted transition hover:bg-panel-muted hover:text-fg">
                   <span>{link.label}</span>
                   <Icon
                     name="lucide:chevron-down"
@@ -288,17 +288,17 @@ const megaLinks = links.filter(
                     aria-hidden="true"
                   />
                 </summary>
-                <div class="mt-1 ml-3 flex flex-col gap-3 border-l border-border pl-3 py-2">
+                <div class="mt-1 ml-3 flex flex-col gap-3 border-l border-stroke pl-3 py-2">
                   {link.columns.map((column) => (
                     <div>
-                      <h3 class="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-text-subtle">
+                      <h3 class="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-fg-subtle">
                         {column.heading}
                       </h3>
                       <div class="flex flex-col gap-0.5">
                         {column.items.map((item) => (
                           <a
                             href={item.href}
-                            class="block  px-3 py-2 text-text-muted transition hover:bg-accent hover:text-text"
+                            class="block  px-3 py-2 text-fg-muted transition hover:bg-panel-muted hover:text-fg"
                           >
                             {item.label}
                           </a>
@@ -311,12 +311,12 @@ const megaLinks = links.filter(
             );
           })
         }
-        {mobileFooterLinks.length > 0 && <hr class="my-2 border-border" />}
+        {mobileFooterLinks.length > 0 && <hr class="my-2 border-stroke" />}
         {
           mobileFooterLinks.map((link) => (
             <a
               href={link.href}
-              class="block  px-3 py-2 text-text-muted transition hover:bg-accent hover:text-text"
+              class="block  px-3 py-2 text-fg-muted transition hover:bg-panel-muted hover:text-fg"
             >
               {link.label}
             </a>
@@ -329,8 +329,8 @@ const megaLinks = links.filter(
 
 <style>
   [data-nav-bar].is-scrolled {
-    border-color: var(--color-border);
-    background-color: color-mix(in oklab, var(--color-bg) 92%, transparent);
+    border-color: var(--color-stroke);
+    background-color: color-mix(in oklab, var(--color-canvas) 92%, transparent);
     backdrop-filter: blur(8px);
     box-shadow: var(--shadow-header);
   }
