@@ -59,6 +59,12 @@ const AnnouncementContent = announcement
     )}
   </head>
   <body>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-intent focus:text-fg-on-intent focus:rounded-sm"
+    >
+      Skip to main content
+    </a>
     <Nav>
       {announcement && AnnouncementContent && (
         <AnnouncementBanner
@@ -71,12 +77,6 @@ const AnnouncementContent = announcement
         </AnnouncementBanner>
       )}
     </Nav>
-    <a
-      href="#main"
-      class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-intent focus:text-fg-on-intent focus:rounded-sm"
-    >
-      Skip to main content
-    </a>
     <slot />
   </body>
 </html>

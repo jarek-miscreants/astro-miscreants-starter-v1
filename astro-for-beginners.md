@@ -2086,6 +2086,208 @@ The same pattern handles brand themes, customer themes, etc. Just stack classes:
 
 Two orthogonal axes (brand × light/dark) compose by stacking classes on `<html>`. Same toggle pattern, same FOUC prevention, same component code.
 
+### This starter's setup — three modes via `data-theme`
+
+The starter uses a single-axis `[data-theme="..."]` attribute instead of stacked classes. Three modes:
+
+- **`light`** — default palette (matches the `@theme` values).
+- **`dark`** — inverse palette.
+- **`brand`** — brand palette (currently dark-leaning, differentiated over time by `--color-intent`, `--accent-line`, etc.).
+
+The whole contract fits in six pieces inside `src/styles/global.css`. Here's each piece, in order.
+
+#### 1. Register one variant per mode
+
+Tailwind v4 needs `@custom-variant` to create `dark:` / `brand:` utility prefixes. Each mode gets its own, so `dark:bg-panel` fires only under dark and `brand:bg-panel` only under brand — they don't leak across modes.
+
+```css
+@import "tailwindcss";
+
+@custom-variant dark  (&:where([data-theme="dark"],  [data-theme="dark"]  *));
+@custom-variant brand (&:where([data-theme="brand"], [data-theme="brand"] *));
+```
+
+Light doesn't need a variant — it's the default, so bare utilities (`bg-panel`, `text-fg`) already describe it.
+
+#### 2. Define the light palette as the default inside `@theme`
+
+`@theme` is the *defaults* block. Everything you put here becomes a utility (`--color-canvas` → `bg-canvas`) and also feeds the cascade when no theme override is active.
+
+```css
+@theme {
+  /* Semantic roles — light defaults */
+  --color-canvas: #f3f3f3;
+  --color-panel: #f9f9f9;
+  --color-panel-muted: #ebebeb;
+
+  --color-fg: #0a0a0a;
+  --color-fg-muted: #525252;
+  --color-fg-subtle: #8a8a8a;
+  --color-fg-on-intent: #ffffff;
+
+  --color-intent: #0a0a0a;
+  --color-intent-hover: #1a1a1a;
+
+  --color-stroke: #d7d7d7;
+  --color-stroke-strong: #bdbdbd;
+  --color-focus: #0a0a0a;
+
+  --color-error: #dc2626;
+  --color-success: #16a34a;
+
+  /* Theme-aware decorative tokens flip per mode too */
+  --pattern-stripe: rgb(0 0 0 / 0.08);
+  --accent-line: rgb(67 57 76);
+
+  /* Shadows flip per mode as well */
+  --shadow-popover:
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 12px 24px -8px rgb(0 0 0 / 0.08),
+    0 24px 48px -12px rgb(0 0 0 / 0.12);
+  --shadow-header: 0 8px 10px -10px rgb(0 0 0 / 0.2);
+}
+```
+
+#### 3. Make every `data-theme` attribute paint its own element
+
+By default, CSS custom properties inherit — so a `<div data-theme="dark">` recolors its *descendants* but not itself. Force the element to also pick up the new `canvas` / `fg` it just redefined:
+
+```css
+[data-theme="light"],
+[data-theme="dark"],
+[data-theme="brand"] {
+  color: var(--color-fg);
+  background-color: var(--color-canvas);
+}
+```
+
+> [!IMPORTANT]
+> Every mode you add must appear in this selector list. A mode you forget here will color its children correctly but leave the attributed element showing the parent's background — a classic "the dark panel has a light strip around it" bug.
+
+#### 4. Write one override block per non-default mode
+
+Each override block just redeclares the semantic tokens. The cascade does the rest — `bg-panel` / `text-fg` / `border-stroke` / `bg-intent` all automatically flip because they resolve through the `var(--color-…)` chain.
+
+```css
+[data-theme="light"] {
+  /* Explicit light block so a <div data-theme="light"> inside a dark
+     ancestor forces itself back to light. It's a duplicate of @theme,
+     but intentionally — it wins against dark/brand via specificity. */
+  --color-canvas: #f3f3f3;
+  --color-panel: #f9f9f9;
+  /* …full token list… */
+  --pattern-stripe: rgb(0 0 0 / 0.08);
+  --accent-line: rgb(67 57 76);
+}
+
+[data-theme="dark"] {
+  --color-canvas: #0a0a0a;
+  --color-panel: #141414;
+  --color-panel-muted: #1f1f1f;
+  --color-fg: #f5f5f5;
+  --color-fg-muted: #a3a3a3;
+  --color-fg-on-intent: #0a0a0a;
+  --color-intent: #f5f5f5;
+  /* …full token list… */
+  --pattern-stripe: rgb(255 255 255 / 0.1);
+  --accent-line: rgb(180 170 190);
+
+  color-scheme: dark;
+}
+
+[data-theme="brand"] {
+  --color-canvas: #0a0a0a;
+  --color-panel: #141414;
+  /* …same structural tokens as dark… */
+  /* …but brand-distinctive accent colors: */
+  --color-intent: #8b5cf6;        /* brand hue — the primary-action colour */
+  --color-intent-hover: #7c3aed;
+  --color-focus: #8b5cf6;         /* focus ring inherits brand */
+  --accent-line: rgb(139 92 246);
+
+  color-scheme: dark;
+}
+```
+
+> [!CAUTION]
+> `color-scheme` only accepts `normal | light | dark | light dark`. Writing `color-scheme: brand` is invalid and browsers silently ignore it, which leaves native scrollbars and form controls stuck in the previous mode. Always resolve each custom theme to one of the four valid values based on whether its surfaces are light- or dark-leaning.
+
+#### 5. Apply a mode
+
+One attribute — anywhere in the tree. At the root for a whole-page theme:
+
+```astro
+<!-- Layout.astro — whole page in dark -->
+<html lang="en" data-theme="dark">
+  …
+</html>
+```
+
+Or nested, for an island that bucks the page theme:
+
+```astro
+<section data-theme="light" class="bg-canvas text-fg">
+  <!-- Forced light island inside a dark page -->
+</section>
+
+<aside data-theme="brand" class="bg-canvas text-fg p-8">
+  <!-- A promotional strip in brand mode, no matter what the page is -->
+</aside>
+```
+
+The classes inside the island don't change. `bg-canvas` resolves against whichever `data-theme` it finds on the nearest ancestor.
+
+#### 6. A per-mode toggle
+
+Same pattern as the light/dark toggle earlier — just cycle three values instead of two, and persist to `localStorage`:
+
+```astro
+<script is:inline>
+  (() => {
+    const stored = localStorage.getItem("theme");
+    if (stored) document.documentElement.setAttribute("data-theme", stored);
+  })();
+</script>
+
+<button
+  type="button"
+  aria-label="Cycle theme"
+  onclick="
+    const root = document.documentElement;
+    const order = ['light', 'dark', 'brand'];
+    const current = root.getAttribute('data-theme') || 'light';
+    const next = order[(order.indexOf(current) + 1) % order.length];
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  "
+  class="p-2 rounded-md hover:bg-panel-muted"
+>
+  Theme
+</button>
+```
+
+The `is:inline` block at the top runs before paint and applies the stored theme — that's the FOUC prevention from earlier, adapted to the attribute-based switch.
+
+#### Where `dark:` and `brand:` utilities are useful
+
+With tokens doing the real work, component code stays theme-agnostic. You should rarely reach for `dark:*` or `brand:*`. The few cases where they're the right tool:
+
+- **Structural swaps** — a different logo file per mode (`dark:hidden` / `brand:hidden`), or a chart that needs grid-color inverted.
+- **One-off surfaces** — a hero image that has a white edge on dark backgrounds; add `brand:mask-b-from-40%` just for brand.
+- **Debug visualization** — a per-mode outline to verify which theme an island is resolving to.
+
+If you find yourself writing `dark:bg-panel`, that's a sign the token is wrong — fix `--color-panel` in the dark override block instead, and *every* `bg-panel` in the codebase follows automatically.
+
+#### Adding a fourth (or nth) mode
+
+Every new mode needs the same five touch-points. If any is missing, you get a silent failure.
+
+1. Register a variant: `@custom-variant <name> (&:where([data-theme="<name>"], [data-theme="<name>"] *));`
+2. Add it to the `[data-theme="…"]` selector list in the paint-own-element rule.
+3. Write an override block `[data-theme="<name>"] { … }` redeclaring every token.
+4. Set a valid `color-scheme` (`light` or `dark`) in the block.
+5. Extend the toggle's `order` array if the user can cycle to it.
+
 ---
 
 ## 29. Custom color systems

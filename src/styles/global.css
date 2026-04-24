@@ -2,13 +2,19 @@
 
 /* ==========================================================================
    THEME ATTRIBUTE
-   Dark mode is controlled by [data-theme="dark"] on any ancestor. Nested
-   [data-theme="light"] islands work inside a dark ancestor and vice versa.
-   No system-preference fallback — theme is whatever the site sets.
-   `dark:` Tailwind variant is wired to the same selector, so utilities like
-   `dark:bg-panel` work alongside the var-based approach below.
+   Three modes, all keyed on a single `[data-theme="..."]` attribute that can
+   live on <html> (whole page) or on any ancestor (scoped island):
+     - light  (default — matches the @theme values below)
+     - dark   (inverse palette)
+     - brand  (brand palette; currently dark-leaning but semantically distinct)
+
+   Each mode registers its own Tailwind variant so per-mode utility overrides
+   (`dark:bg-panel`, `brand:text-intent`) don't leak across modes. No
+   prefers-color-scheme fallback by design — the theme is whatever the site
+   sets.
    ========================================================================== */
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant dark  (&:where([data-theme="dark"],  [data-theme="dark"]  *));
+@custom-variant brand (&:where([data-theme="brand"], [data-theme="brand"] *));
 
 /* ==========================================================================
    THEME TOKENS
@@ -116,7 +122,8 @@
    dark ancestor forces itself back to light.
    ========================================================================== */
 [data-theme="light"],
-[data-theme="dark"] {
+[data-theme="dark"],
+[data-theme="brand"] {
   color: var(--color-fg);
   background-color: var(--color-canvas);
 }
@@ -168,6 +175,34 @@
     0 24px 48px -12px rgb(0 0 0 / 0.6);
   --shadow-header: 0 8px 10px -10px rgb(0 0 0 / 0.8);
 
+  color-scheme: dark;
+}
+
+[data-theme="brand"] {
+  --color-canvas: #0a0a0a;
+  --color-panel: #141414;
+  --color-panel-muted: #1f1f1f;
+  --color-fg: #f5f5f5;
+  --color-fg-muted: #a3a3a3;
+  --color-fg-subtle: #6b6b6b;
+  --color-fg-on-intent: #0a0a0a;
+  --color-intent: #f5f5f5;
+  --color-intent-hover: #e5e5e5;
+  --color-stroke: #2a2a2a;
+  --color-stroke-strong: #3d3d3d;
+  --color-focus: #f5f5f5;
+  --color-error: #ef4444;
+  --color-success: #22c55e;
+  --pattern-stripe: rgb(255 255 255 / 0.1);
+  --accent-line: rgb(180 170 190);
+  --shadow-popover:
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 12px 24px -8px rgb(0 0 0 / 0.5),
+    0 24px 48px -12px rgb(0 0 0 / 0.6);
+  --shadow-header: 0 8px 10px -10px rgb(0 0 0 / 0.8);
+
+  /* `color-scheme` only accepts normal | light | dark | light dark.
+     Brand is dark-leaning, so UA controls and scrollbars should use dark. */
   color-scheme: dark;
 }
 
@@ -392,6 +427,15 @@
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+/* Reduced-motion users: stop the scroll entirely. The logos remain visible
+   in their starting position — the duplicate second slot simply sits
+   offscreen behind overflow-hidden, so no visual artifact. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
 }
 
 /*

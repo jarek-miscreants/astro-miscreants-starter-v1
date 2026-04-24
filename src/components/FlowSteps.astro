@@ -68,7 +68,7 @@ const panelHTML = await Promise.all(
   data-flow-steps
   style={`--flow-active: 0; --flow-duration: ${duration}ms; --flow-panel-h: ${panelHeight}px;`}
   class:list={[
-    "relative md:grid md:grid-cols-2 border-y border-stroke bg-canvas",
+    "relative md:grid md:grid-cols-2  border-stroke bg-canvas",
     className,
   ]}
 >
@@ -135,8 +135,9 @@ const panelHTML = await Promise.all(
         id={`flow-${uid}-panel-${i}`}
         role="tabpanel"
         aria-labelledby={`flow-${uid}-tab-${i}`}
-        tabindex={0}
+        tabindex={i === 0 ? 0 : -1}
         aria-hidden={i === 0 ? "false" : "true"}
+        inert={i !== 0}
         class="flow-panel flex items-center justify-center px-8 md:px-12 focus-visible:outline-2 focus-visible:outline-focus"
       >
         <Fragment set:html={panelHTML[i]} />
@@ -263,7 +264,12 @@ const panelHTML = await Promise.all(
       });
 
       panels.forEach((p, i) => {
-        p.setAttribute("aria-hidden", i === index ? "false" : "true");
+        const active = i === index;
+        p.setAttribute("aria-hidden", active ? "false" : "true");
+        p.setAttribute("tabindex", active ? "0" : "-1");
+        // inert: blocks focus/interaction on the element AND its descendants,
+        // so focusable content inside an offscreen panel can't be tabbed into.
+        p.inert = !active;
       });
     };
 
