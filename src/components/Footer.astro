@@ -16,7 +16,10 @@ interface Props {
   columns?: LinkColumn[];
   legal?: LinkItem[];
   socials?: SocialItem[];
+  borderTop?: boolean;
+  borderBottom?: boolean;
 }
+
 
 // Defaults match the demo content — pages can override per-instance.
 const {
@@ -62,6 +65,8 @@ const {
     { label: "LinkedIn", href: "#", icon: "lucide:linkedin" },
     { label: "YouTube", href: "#", icon: "lucide:youtube" },
   ],
+  borderTop = false,
+  borderBottom = false,
 } = Astro.props;
 ---
 
@@ -69,7 +74,11 @@ const {
     section on the page; the side columns render the same edge pattern. */}
 <footer
   id="site-footer"
-  class="section-grid-outside border-t border-stroke"
+  class:list={[
+    "section-grid-outside",
+    borderTop && "border-t border-stroke",
+    borderBottom && "border-b border-stroke",
+  ]}
   aria-labelledby="footer-heading"
 >
   <h2 id="footer-heading" class="sr-only">Footer</h2>

@@ -73,7 +73,9 @@ const panelHTML = await Promise.all(
   ]}
 >
   {/* ─── DESKTOP LEFT COLUMN: heading + step list ─── */}
-  <div class="hidden md:flex md:flex-col md:justify-between md:border-r md:border-stroke">
+  {/* No right border here — the right column's `border-l` (part of its
+      full `border border-stroke`) draws the divider, avoiding a double line. */}
+  <div class="hidden md:flex md:flex-col md:justify-between">
     {(title || description) && (
       <div class="px-10 pt-20 pb-10">
         {title && <h2 class="h3">{title}</h2>}
@@ -125,7 +127,7 @@ const panelHTML = await Promise.all(
 
   {/* ─── DESKTOP RIGHT COLUMN: stacked panels ─── */}
   <div
-    class="hidden md:grid relative overflow-hidden bg-panel-muted [grid-template-areas:'stack'] [&>*]:[grid-area:stack]"
+    class="hidden md:grid relative overflow-hidden border border-stroke bg-panel-muted [grid-template-areas:'stack'] [&>*]:[grid-area:stack]"
     style={`min-height: var(--flow-panel-h);`}
   >
     {steps.map((step, i) => (

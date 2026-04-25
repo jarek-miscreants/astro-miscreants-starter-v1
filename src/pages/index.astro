@@ -11,14 +11,16 @@ import CardIcon from "../components/CardIcon.astro";
 import Tabs from "../components/Tabs.astro";
 import Accordion from "../components/Accordion.astro";
 import FlowSteps from "../components/FlowSteps.astro";
-import HubspotForm from "../components/HubspotForm.astro";
 import { getCollection, render } from "astro:content";
 import LogoMarquee from "../components/LogoMarquee.astro";
 import Footer from "../components/Footer.astro";
 import SliderBasic from "../components/SliderBasic.astro";
 import SliderBasicMap from "../components/SliderBasicMap.astro";
 import ComboboxGrouped from "../components/ComboboxGrouped.astro";
+import FeatureScrollSpy from "../components/FeatureScrollSpy.astro";
+import AccordionMorph from "../components/AccordionMorph.astro";
 import clients from "../data/clients.json";
+import Grid from "../components/Grid.astro";
 
 const faqs = (await getCollection("faq"))
   .filter((faq) => faq.data.page === "homepage")
@@ -26,7 +28,7 @@ const faqs = (await getCollection("faq"))
 ---
 
 <Layout title="Astro Playground">
-    <main id="main" class="border-y border-stroke">
+    <main id="main" >
 
       <SectionMain id="hero" padding="none" contentPadding="none" contentClass="items-center text-center relative">
         <div class="relative z-20 flex flex-col items-center gap-2 py-32 md:py-48 px-6">
@@ -256,49 +258,86 @@ const faqs = (await getCollection("faq"))
         />
       </SectionMain>
 
-      <SectionMain id="combobox" padding="sm" borderTop>
-        <div class="flex flex-col gap-4 mb-6">
-          <h2 class="h3">Combobox — grouped</h2>
-          <p class="mt-2 text-fg-muted">Searchable dropdown with grouped options, full keyboard nav, and form support.</p>
+      
+
+      <SectionMain id="scrollspy" padding="md" borderTop>
+        <div class="flex flex-col gap-4 mb-12">
+          <h2 class="h3">Feature scroll-spy</h2>
+          <p class="mt-2 text-fg-muted">Sticky TOC on the left, scrolling content on the right. Active item updates as you scroll.</p>
         </div>
 
-        <div class="max-w-sm">
-          <ComboboxGrouped
-            name="framework"
-            placeholder="Select a framework…"
-            ariaLabel="Choose a framework"
-            groups={[
-              {
-                heading: "Frameworks",
-                items: [
-                  { value: "astro", label: "Astro", description: "Content-focused, ships zero JS by default" },
-                  { value: "nextjs", label: "Next.js", description: "React framework with SSR + static" },
-                  { value: "nuxt", label: "Nuxt", description: "Vue framework with SSR + static" },
-                  { value: "sveltekit", label: "SvelteKit", description: "Svelte's official meta-framework" },
-                ],
-              },
-              {
-                heading: "Styling",
-                items: [
-                  { value: "tailwind", label: "Tailwind CSS", description: "Utility-first CSS framework" },
-                  { value: "vanilla-extract", label: "vanilla-extract", description: "Type-safe CSS-in-TS" },
-                  { value: "css-modules", label: "CSS Modules", description: "Scoped class names" },
-                ],
-              },
-              {
-                heading: "Bundlers",
-                items: [
-                  { value: "vite", label: "Vite", description: "ESM-native dev server" },
-                  { value: "esbuild", label: "esbuild", description: "Go-based, very fast" },
-                  { value: "rollup", label: "Rollup", description: "Library-friendly bundler", disabled: true },
-                ],
-              },
+        <FeatureScrollSpy
+          tocLabel="Capabilities"
+          ariaLabel="Feature sections"
+          items={[
+            { id: "spy-workflows", label: "Real-time workflows", eyebrow: "01" },
+            { id: "spy-lifecycle", label: "Data lifecycle",     eyebrow: "02" },
+            { id: "spy-schema",    label: "Schema-driven",      eyebrow: "03" },
+            { id: "spy-perf",      label: "Performance",        eyebrow: "04" },
+          ]}
+        >
+          <article id="spy-workflows">
+            <span class="text-body-sm text-fg-muted">Real-time workflows</span>
+            <h3 class="h3 mt-2">Collaborate without losing context.</h3>
+            <p class="mt-4 text-fg-muted max-w-prose">
+              Every change syncs instantly across teammates. Cursors, selections, and comments stay in lockstep so reviews happen in the document, not in a separate thread.
+            </p>
+            <img src={featureOne.src} alt="Workflow screenshot" class="mt-6 w-full mask-b-from-30% mask-b-to-95%" />
+          </article>
+
+          <article id="spy-lifecycle">
+            <span class="text-body-sm text-fg-muted">Data lifecycle</span>
+            <h3 class="h3 mt-2">From ingest to archive in one place.</h3>
+            <p class="mt-4 text-fg-muted max-w-prose">
+              Track every dataset through versioning, review, and approval. Audit trails are immutable; reverting is one click; nothing falls through the cracks.
+            </p>
+            <img src={featureOne.src} alt="Lifecycle screenshot" class="mt-6 w-full mask-b-from-30% mask-b-to-95%" />
+          </article>
+
+          <article id="spy-schema">
+            <span class="text-body-sm text-fg-muted">Schema-driven</span>
+            <h3 class="h3 mt-2">Structure your data your way.</h3>
+            <p class="mt-4 text-fg-muted max-w-prose">
+              Define schemas with the same primitives as your codebase. Strong typing flows through forms, validation, and the public API — no runtime surprises.
+            </p>
+            <img src={featureOne.src} alt="Schema screenshot" class="mt-6 w-full mask-b-from-30% mask-b-to-95%" />
+          </article>
+
+          <article id="spy-perf">
+            <span class="text-body-sm text-fg-muted">Performance</span>
+            <h3 class="h3 mt-2">Built for scale, by default.</h3>
+            <p class="mt-4 text-fg-muted max-w-prose">
+              Hundreds of millions of daily fetches, sub-50ms p95s in every region. Performance isn't an upgrade tier — it's the baseline.
+            </p>
+            <img src={featureOne.src} alt="Performance screenshot" class="mt-6 w-full mask-b-from-30% mask-b-to-95%" />
+          </article>
+        </FeatureScrollSpy>
+      </SectionMain>
+
+      <SectionMain id="accordion-morph" padding="sm" borderTop>
+        <Grid mobile={1} mobileLandscape={2} tablet={2} desktop={2} gap="sm">
+        <div class="flex flex-col gap-4 mb-6">
+          <h2 class="h3">Accordion — morphing</h2>
+          <p class="mt-2 text-fg-muted">Native &lt;details&gt; with mutually-exclusive open via shared `name`. Bouncy height interpolation, fade/blur content, and morphing radius/margin between rows.</p>
+        </div>
+
+        <div class="max-w-full">
+          <AccordionMorph
+            ariaLabel="Frequently asked questions"
+            openIndex={0}
+            items={[
+              { icon: "lucide:wrench",   title: "What is design engineering?", description: "Where design intuition meets code execution — enabling you to see UI problems and build solutions from the ground up." },
+              { icon: "lucide:puzzle",   title: "What is the craft of UI?",    description: "A course about building things well — mastering the web platform so you're not limited by tools or libraries." },
+              { icon: "lucide:globe",    title: "Why focus on the web platform?", description: "Because when you work with the web — not fight it — you unlock performance, accessibility, and durability that last." },
+              { icon: "lucide:sparkles", title: "Why does craft matter?",      description: "Because it's more than making something work — it's making something feel right: inclusive, resilient, and scalable." },
+              { icon: "lucide:users",    title: "Who is this for?",            description: "Designers who code, developers who design — anyone ready to stop chasing snippets and become the person who can build anything." },
             ]}
           />
         </div>
+        </Grid>
       </SectionMain>
 
-      <SectionMain id="flow-steps" padding="none" contentPadding="none" borderTop>
+      <SectionMain id="flow-steps" paddingBottom="md" contentPadding="none" borderTop>
         <FlowSteps
           title="How it works."
           description="Clicking a step slides the panel column — three panels stacked in one grid cell, each offset by index * 100% along the Y axis."
@@ -309,7 +348,7 @@ const faqs = (await getCollection("faq"))
           ]}
         >
           <Fragment slot="panel-0">
-            <div class="w-full max-w-sm p-6 flex flex-col gap-5 rounded-2xl bg-panel shadow-popover">
+            <div class="w-full  max-w-sm p-6 flex flex-col gap-5 rounded-2xl bg-panel shadow-popover">
               <div class="font-semibold text-sm">Add credential</div>
               <div class="flex flex-col gap-2">
                 <div class="text-fg-muted text-xs">Credential type</div>
@@ -386,5 +425,5 @@ const faqs = (await getCollection("faq"))
 
 
     </main>
-    <Footer />
+    <Footer borderTop={true} />
   </Layout>

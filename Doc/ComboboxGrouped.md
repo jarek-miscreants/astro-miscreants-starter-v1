@@ -130,3 +130,53 @@ Pass `name="myField"` and the component emits a hidden `<input>` whose value is 
 2. **`value` must match an `item.value`.** If you pass a `value` that doesn't exist in `groups`, the trigger falls back to the placeholder.
 3. **Filter matches both label and description.** Watch out for typos in descriptions surfacing matches you didn't intend. To filter on label only, swap the `text` line in the script's `filter` function.
 4. **The panel uses `position: absolute; left: 0; right: 0; top: 100%`.** It sits below the trigger and matches its width. If the panel would clip at the bottom of the viewport, you'll need to add a flip-up adjustment yourself — not built in to keep the component minimal.
+
+## Full example with layout
+
+Example implementation with a layout:
+
+```astro
+<SectionMain id="combobox" padding="sm" borderTop>
+  <Grid mobile={1} mobileLandscape={2} tablet={2} desktop={2} gap="sm">
+    <div class="flex flex-col gap-4 mb-6">
+      <h2 class="h3">Combobox — grouped</h2>
+      <p class="mt-2 text-fg-muted">Searchable dropdown with grouped options, full keyboard nav, and form support.</p>
+    </div>
+
+    <div class="max-w-sm">
+      <ComboboxGrouped
+        name="framework"
+        placeholder="Select a framework…"
+        ariaLabel="Choose a framework"
+        groups={[
+          {
+            heading: "Frameworks",
+            items: [
+              { value: "astro", label: "Astro", description: "Content-focused, ships zero JS by default" },
+              { value: "nextjs", label: "Next.js", description: "React framework with SSR + static" },
+              { value: "nuxt", label: "Nuxt", description: "Vue framework with SSR + static" },
+              { value: "sveltekit", label: "SvelteKit", description: "Svelte's official meta-framework" },
+            ],
+          },
+          {
+            heading: "Styling",
+            items: [
+              { value: "tailwind", label: "Tailwind CSS", description: "Utility-first CSS framework" },
+              { value: "vanilla-extract", label: "vanilla-extract", description: "Type-safe CSS-in-TS" },
+              { value: "css-modules", label: "CSS Modules", description: "Scoped class names" },
+            ],
+          },
+          {
+            heading: "Bundlers",
+            items: [
+              { value: "vite", label: "Vite", description: "ESM-native dev server" },
+              { value: "esbuild", label: "esbuild", description: "Go-based, very fast" },
+              { value: "rollup", label: "Rollup", description: "Library-friendly bundler", disabled: true },
+            ],
+          },
+        ]}
+      />
+    </div>
+  </Grid>
+</SectionMain>
+```
