@@ -112,6 +112,44 @@
      -------------------------------------------------- */
   --pattern-stripe: rgb(0 0 0 / 0.08);
   --accent-line: rgb(67 57 76);
+
+  /* ---------- Motion: durations, easings, timing partials ----------
+     Durations auto-generate `duration-*` utilities.
+     Easings are plain CSS vars (use via `var(--cubic-default)` or as
+     custom timing-function values).
+     Timing partials are pre-composed duration+easing pairs meant to be
+     concatenated with a keyframe name at the call site, e.g.
+       animation: fade-in var(--timing-default-half);
+       transition: opacity var(--timing-default-half);
+     Kept out of the --animation-* namespace because they are partial
+     shorthands (no name) and Tailwind would otherwise generate
+     inert animate-* utilities from them.
+     ------------------------------------------------------ */
+
+  /* Easings — declare first so the partials below resolve cleanly. */
+  --cubic-default: cubic-bezier(0.625, 0.05, 0, 1);
+  --cubic-bounce:  linear(0, 0.5737 7.6%, 0.8382 11.87%, 0.9463 14.19%, 1.0292 16.54%, 1.0886 18.97%, 1.1258 21.53%, 1.137 22.97%, 1.1424 24.48%, 1.1423 26.1%, 1.1366 27.86%, 1.1165 31.01%, 1.0507 38.62%, 1.0219 42.57%, 0.9995 46.99%, 0.9872 51.63%, 0.9842 58.77%, 1.0011 81.26%, 1);
+  --hover-effect:  cubic-bezier(0.175, 0.885, 0.32, 1.1);
+
+  /* Durations (→ generates duration-default-* utilities) */
+  --duration-default-quarter: 0.2s;
+  --duration-default-half:    0.4s;
+  --duration-default:         0.8s;
+  --duration-default-onehalf: 1.2s;
+  --duration-default-double:  1.6s;
+
+  /* Default timing partials (duration + --cubic-default) */
+  --timing-default-quarter: var(--duration-default-quarter) var(--cubic-default);
+  --timing-default-half:    var(--duration-default-half)    var(--cubic-default);
+  --timing-default:         var(--duration-default)         var(--cubic-default);
+  --timing-default-onehalf: var(--duration-default-onehalf) var(--cubic-default);
+  --timing-default-double:  var(--duration-default-double)  var(--cubic-default);
+
+  /* Hover timing partials (duration + --hover-effect) */
+  --timing-hover-half:    var(--duration-default-half)    var(--hover-effect);
+  --timing-hover-default: var(--duration-default)         var(--hover-effect);
+  --timing-hover-onehalf: var(--duration-default-onehalf) var(--hover-effect);
+  --timing-hover-double:  var(--duration-default-double)  var(--hover-effect);
 }
 
 /* ==========================================================================
@@ -141,8 +179,8 @@
   --color-stroke: #d7d7d7;
   --color-stroke-strong: #bdbdbd;
   --color-focus: #0a0a0a;
-  --color-error: #dc2626;
-  --color-success: #16a34a;
+  --color-error: #841B20;
+  --color-success: #4C6649;
   --pattern-stripe: rgb(0 0 0 / 0.08);
   --accent-line: rgb(67 57 76);
   --shadow-popover:
@@ -165,8 +203,8 @@
   --color-stroke: #2a2a2a;
   --color-stroke-strong: #3d3d3d;
   --color-focus: #f5f5f5;
-  --color-error: #ef4444;
-  --color-success: #22c55e;
+  --color-error: #841B20;
+  --color-success: #4C6649;
   --pattern-stripe: rgb(255 255 255 / 0.1);
   --accent-line: rgb(180 170 190);
   --shadow-popover:
@@ -191,8 +229,8 @@
   --color-stroke: #2a2a2a;
   --color-stroke-strong: #3d3d3d;
   --color-focus: #f5f5f5;
-  --color-error: #ef4444;
-  --color-success: #22c55e;
+  --color-error: #841B20;
+  --color-success: #4C6649;
   --pattern-stripe: rgb(255 255 255 / 0.1);
   --accent-line: rgb(180 170 190);
   --shadow-popover:
@@ -408,7 +446,9 @@
   @apply grid grid-cols-[1fr_1rem_minmax(0,90rem)_1rem_1fr] md:grid-cols-[1fr_2.5rem_minmax(0,90rem)_2.5rem_1fr];
 }
 
-/* Elevates an element above a StretchedCard overlay (z-[1]) */
+
+
+
 @utility card-action {
   position: relative;
   z-index: 2;
@@ -478,3 +518,8 @@
   border-right: 1px solid var(--accent-line);
 }
 
+
+::before,
+::after {
+  box-sizing: border-box;
+}

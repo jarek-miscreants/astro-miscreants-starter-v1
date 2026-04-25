@@ -162,9 +162,13 @@ const motionEasings = [
             <div class="p-4">
               <div class="flex items-baseline justify-between gap-2">
                 <code class="font-mono text-sm text-fg">{c.name}</code>
-                <code class="font-mono text-xs text-fg-subtle">{c.var}</code>
+                <code
+                  class="font-mono text-xs text-fg-subtle"
+                  data-resolve-css-var={c.var}
+                >…</code>
               </div>
-              <p class="mt-1 text-xs text-fg-muted">{c.role}</p>
+              <code class="mt-1 block font-mono text-[10px] text-fg-subtle">{c.var}</code>
+              <p class="mt-2 text-xs text-fg-muted">{c.role}</p>
             </div>
           </li>
         ))}
@@ -185,10 +189,11 @@ const motionEasings = [
       <h3 class="h5 mt-8 mb-4">Headings</h3>
       <ul class="flex flex-col">
         {typeScale.map((t) => (
-          <li class="grid grid-cols-[5rem_1fr_auto] items-baseline gap-4 py-4 border-t border-stroke">
+          <li class="grid grid-cols-[5rem_1fr_auto_auto] items-baseline gap-4 py-4 border-t border-stroke">
             <code class="font-mono text-xs text-fg-subtle">{t.class}</code>
-            <span class={t.class}>{t.example}</span>
-            <span class="text-xs text-fg-muted">{t.desc}</span>
+            <span class={t.class} data-resolve-font-size>{t.example}</span>
+            <code class="font-mono text-xs text-fg-subtle whitespace-nowrap" data-resolve-font-size-target>…</code>
+            <span class="text-xs text-fg-muted whitespace-nowrap">{t.desc}</span>
           </li>
         ))}
       </ul>
@@ -196,9 +201,10 @@ const motionEasings = [
       <h3 class="h5 mt-12 mb-4">Body</h3>
       <ul class="flex flex-col">
         {bodyScale.map((t) => (
-          <li class="grid grid-cols-[8rem_1fr_auto] items-baseline gap-4 py-4 border-t border-stroke">
+          <li class="grid grid-cols-[8rem_1fr_auto_auto] items-baseline gap-4 py-4 border-t border-stroke">
             <code class="font-mono text-xs text-fg-subtle">{t.class}</code>
-            <span class={t.class}>{t.example}</span>
+            <span class={t.class} data-resolve-font-size>{t.example}</span>
+            <code class="font-mono text-xs text-fg-subtle whitespace-nowrap" data-resolve-font-size-target>…</code>
             <span class="text-xs text-fg-muted whitespace-nowrap">{t.desc}</span>
           </li>
         ))}
@@ -326,13 +332,14 @@ const motionEasings = [
         {motionDurations.map((d) => (
           <li
             class="motion-swatch border border-stroke bg-canvas p-4 flex flex-col gap-2 cursor-pointer"
-            style={`--swatch-duration: ${d.value};`}
+            style={`--swatch-duration: var(--${d.name});`}
+            data-resolve-css-var-on-style={`--${d.name}`}
           >
             <div class="motion-swatch-bar h-8 bg-panel-muted relative overflow-hidden">
               <div class="motion-swatch-fill absolute inset-0 bg-fg" style="transform-origin: left;"></div>
             </div>
             <code class="font-mono text-xs text-fg">{d.name}</code>
-            <code class="font-mono text-[10px] text-fg-subtle">{d.value}</code>
+            <code class="font-mono text-[10px] text-fg-subtle" data-resolve-css-var={`--${d.name}`}>…</code>
             <p class="text-xs text-fg-muted">{d.desc}</p>
           </li>
         ))}
@@ -364,3 +371,41 @@ const motionEasings = [
     transform: scaleX(1);
   }
 </style>
+
+<script>
+  // Resolve every CSS custom-property reference written into the page, so
+  // displayed values stay in sync with whatever's in global.css. Re-runs
+  // when Vite HMR pushes a CSS update, so editing a token live-updates the
+  // labels without a full reload.
+  const resolve = () => {
+    const docStyle = getComputedStyle(document.documentElement);
+
+    // Color/duration var → text content
+    document.querySelectorAll<HTMLElement>("[data-resolve-css-var]").forEach((el) => {
+      const name = el.dataset.resolveCssVar;
+      if (!name) return;
+      const value = docStyle.getPropertyValue(name).trim();
+      el.textContent = value || "(unset)";
+    });
+
+    // Computed font-size for typography rows
+    document.querySelectorAll<HTMLElement>("[data-resolve-font-size]").forEach((sample) => {
+      const target = sample.parentElement?.querySelector<HTMLElement>(
+        "[data-resolve-font-size-target]"
+      );
+      if (!target) return;
+      const px = parseFloat(getComputedStyle(sample).fontSize);
+      target.textContent = `${px.toFixed(1)}px`;
+    });
+  };
+
+  resolve();
+
+  // Re-resolve on viewport change (fluid type) and on any CSS HMR push.
+  window.addEventListener("resize", resolve);
+  // @ts-ignore — Vite's `import.meta.hot` is only present in dev
+  if (import.meta.hot) {
+    // @ts-ignore
+    import.meta.hot.on("vite:afterUpdate", resolve);
+  }
+</script>
