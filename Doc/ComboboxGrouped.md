@@ -4,7 +4,7 @@
 
 ## What it does
 
-A searchable dropdown with grouped options. Modeled on shadcnblocks **combobox-grouped-6**, restyled with the starter's design tokens. Includes live filtering, full keyboard navigation, group headings that hide automatically when their items are filtered out, an empty state, and form integration via a hidden input.
+A searchable dropdown with grouped options. Includes live filtering, full keyboard navigation, group headings that hide automatically when their items are filtered out, an empty state, and form integration via a hidden input.
 
 ## Props
 
