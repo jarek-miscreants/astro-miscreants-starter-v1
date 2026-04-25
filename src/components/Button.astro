@@ -1,7 +1,10 @@
 ---
 import { Icon } from "astro-icon/components";
+import type { HTMLAttributes } from "astro/types";
 
-interface Props {
+// Extends both <button> and <a> attribute sets so callers can pass any native
+// attribute (data-*, aria-*, onclick, etc.) without us listing each one.
+type Props = HTMLAttributes<"button"> & HTMLAttributes<"a"> & {
   label?: string;
   variant?: "primary" | "secondary" | "tertiary";
   href?: string;
@@ -12,7 +15,7 @@ interface Props {
   withArrow?: boolean;
   arrowDirection?: "right" | "left";
   class?: string;
-}
+};
 
 const {
   label = "Learn More",
@@ -25,6 +28,7 @@ const {
   withArrow = true,
   arrowDirection = "right",
   class: className,
+  ...rest
 } = Astro.props;
 
 const Tag = href && !disabled ? "a" : "button";
@@ -55,6 +59,7 @@ const safeRel =
 ---
 
 <Tag
+  {...rest}
   href={Tag === "a" ? href : undefined}
   type={Tag === "button" ? type : undefined}
   target={Tag === "a" ? target : undefined}

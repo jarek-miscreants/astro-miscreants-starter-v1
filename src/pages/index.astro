@@ -19,6 +19,7 @@ import SliderBasicMap from "../components/SliderBasicMap.astro";
 import ComboboxGrouped from "../components/ComboboxGrouped.astro";
 import FeatureScrollSpy from "../components/FeatureScrollSpy.astro";
 import AccordionMorph from "../components/AccordionMorph.astro";
+import Modal from "../components/Modal.astro";
 import clients from "../data/clients.json";
 import Grid from "../components/Grid.astro";
 
@@ -336,6 +337,61 @@ const faqs = (await getCollection("faq"))
         </div>
         </Grid>
       </SectionMain>
+
+      <SectionMain id="modal" padding="sm" borderTop>
+        <div class="flex flex-col gap-4 mb-6">
+          <h2 class="h3">Modal</h2>
+          <p class="mt-2 text-fg-muted">Native &lt;dialog&gt; with Pattern 1 wiring — buttons declare their target by id, multiple triggers can open the same modal.</p>
+        </div>
+
+        <ButtonGroup>
+          <Button label="Open signup" data-modal-open="demo-signup" />
+          <Button label="Open confirm" variant="secondary" data-modal-open="demo-confirm" />
+          <Button label="Same modal again" variant="secondary" data-modal-open="demo-signup" />
+        </ButtonGroup>
+      </SectionMain>
+
+      {/* Modals live near the bottom — they render in the top-layer regardless of position, but keeping them out of section flow avoids any stacking-context surprises. */}
+      <Modal id="demo-signup" size="md" ariaLabel="Sign up">
+        <h2 slot="title">Create your account</h2>
+        <p slot="description">Spin up a project in under five minutes.</p>
+
+        <form class="flex flex-col gap-3" onsubmit="event.preventDefault(); this.closest('dialog').close();">
+          <label class="flex flex-col gap-1 text-sm">
+            <span class="text-fg-muted">Email</span>
+            <input
+              type="email"
+              required
+              data-modal-autofocus
+              class="border border-stroke bg-canvas px-3 py-2 text-sm text-fg outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+            />
+          </label>
+          <label class="flex flex-col gap-1 text-sm">
+            <span class="text-fg-muted">Password</span>
+            <input
+              type="password"
+              required
+              minlength={8}
+              class="border border-stroke bg-canvas px-3 py-2 text-sm text-fg outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+            />
+          </label>
+        </form>
+
+        <Fragment slot="footer">
+          <Button label="Cancel" variant="secondary" data-modal-close />
+          <Button label="Create account" />
+        </Fragment>
+      </Modal>
+
+      <Modal id="demo-confirm" size="sm" ariaLabel="Confirm action">
+        <h2 slot="title">Delete project?</h2>
+        <p slot="description">This action can't be undone. All associated data will be permanently removed.</p>
+
+        <Fragment slot="footer">
+          <Button label="Cancel" variant="secondary" data-modal-close />
+          <Button label="Delete" data-modal-close />
+        </Fragment>
+      </Modal>
 
       <SectionMain id="flow-steps" paddingBottom="md" contentPadding="none" borderTop>
         <FlowSteps
