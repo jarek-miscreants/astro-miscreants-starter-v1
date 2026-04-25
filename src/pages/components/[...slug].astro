@@ -75,6 +75,12 @@ const siblings = all
   .prose-doc {
     color: var(--color-fg);
     align-self: center;
+    /* Flex items default to min-width: auto and grow to fit their largest
+       min-content child (long code strings, wide tables). Set min-width: 0
+       so the article shrinks to its parent column on narrow viewports. */
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
   }
   .prose-doc :where(h2):not(:where(.not-prose, .not-prose *)) {
     font-size: 1.5rem;
@@ -109,6 +115,15 @@ const siblings = all
     font-size: 0.85em;
     border-radius: 2px;
     color: var(--color-fg);
+    /* Long type signatures or paths shouldn't push the article wider than
+       the viewport — let them break wherever needed. */
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  /* Same for inline code that lands inside headings (e.g. an `h3` with
+     "Why <code>::details-content</code>"). */
+  .prose-doc :where(h2, h3, h4, h5, h6):not(:where(.not-prose, .not-prose *)) {
+    overflow-wrap: anywhere;
   }
   .prose-doc :where(pre):not(:where(.not-prose, .not-prose *)) {
     background: var(--color-fg);
