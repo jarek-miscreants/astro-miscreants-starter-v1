@@ -1,0 +1,65 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SectionMain from "../../components/SectionMain.astro";
+import { getCollection } from "astro:content";
+
+const all = await getCollection("components");
+
+// Group by category, then sort each group by `order` (then title as tie-break).
+const categoryOrder = ["primitive", "block", "pattern", "layout", "form"] as const;
+const categoryLabels: Record<typeof categoryOrder[number], string> = {
+  primitive: "Primitives",
+  block: "Blocks",
+  pattern: "Patterns",
+  layout: "Layout",
+  form: "Forms",
+};
+
+const groups = categoryOrder
+  .map((cat) => ({
+    category: cat,
+    label: categoryLabels[cat],
+    items: all
+      .filter((c) => c.data.category === cat)
+      .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title)),
+  }))
+  .filter((g) => g.items.length > 0);
+---
+
+<Layout title="Components">
+  <main id="main" class="border-y border-stroke">
+    <SectionMain id="components-hero" paddingTop="lg" paddingBottom="xs" contentPadding="default">
+      <h1 class="h2">Components</h1>
+      <p class="mt-3 max-w-prose text-fg-muted">
+        Browseable index of every component in the starter. Each entry lives as an MDX file in <code>src/content/components/</code>; the body becomes the detail page, the frontmatter drives this list.
+      </p>
+    </SectionMain>
+
+    {groups.map((group) => (
+      <SectionMain id={`group-${group.category}`} padding="sm" borderTop>
+        <header class="mb-6 flex items-baseline justify-between gap-4">
+          <h2 class="h4">{group.label}</h2>
+          <span class="text-xs uppercase tracking-wider text-fg-subtle">{group.items.length}</span>
+        </header>
+        <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {group.items.map((item) => (
+            <li>
+              <a
+                href={`/components/${item.id}/`}
+                class="flex h-full flex-col gap-2 border border-stroke bg-canvas p-6 transition hover:bg-panel-muted hover:border-stroke-strong focus-visible:bg-panel-muted outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <h3 class="text-sm font-semibold text-fg">{item.data.title}</h3>
+                  <span class="text-[10px] uppercase tracking-wider text-fg-subtle">
+                    {item.data.status}
+                  </span>
+                </div>
+                <p class="text-sm text-fg-muted line-clamp-3">{item.data.description}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </SectionMain>
+    ))}
+  </main>
+</Layout>
