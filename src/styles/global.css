@@ -425,11 +425,11 @@
 }
 
 /* Vertical rhythm only — horizontal padding is owned by .container-large */
-@utility section-padding-xs { @apply py-12 md:py-16; }
-@utility section-padding-sm { @apply py-16 md:py-20; }
-@utility section-padding    { @apply py-24 md:py-32; }
-@utility section-padding-lg { @apply py-32 md:py-48; }
-@utility section-padding-xl { @apply py-48 md:py-64; }
+@utility section-padding-xs { @apply py-12 md:py-12; }
+@utility section-padding-sm { @apply py-16 md:py-16; }
+@utility section-padding    { @apply py-24 md:py-24; }
+@utility section-padding-lg { @apply py-32 md:py-32; }
+@utility section-padding-xl { @apply py-48 md:py-48; }
 
 @utility section-pt-xs { @apply pt-12 md:pt-16; }
 @utility section-pt-sm { @apply pt-16 md:pt-20; }

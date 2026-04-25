@@ -49,11 +49,11 @@ const bodyScale = [
 ];
 
 const sectionPaddings = [
-  { class: "section-padding-xs", height: "py-12 → py-16",  px: "48 / 64" },
-  { class: "section-padding-sm", height: "py-16 → py-20",  px: "64 / 80" },
-  { class: "section-padding",    height: "py-24 → py-32",  px: "96 / 128" },
-  { class: "section-padding-lg", height: "py-32 → py-48",  px: "128 / 192" },
-  { class: "section-padding-xl", height: "py-48 → py-64",  px: "192 / 256" },
+  { class: "section-padding-xs", height: "py-12", px: "48px" },
+  { class: "section-padding-sm", height: "py-16", px: "64px" },
+  { class: "section-padding",    height: "py-24", px: "96px" },
+  { class: "section-padding-lg", height: "py-32", px: "128px" },
+  { class: "section-padding-xl", height: "py-48", px: "192px" },
 ];
 
 const radii = [
@@ -248,7 +248,7 @@ const motionEasings = [
             <div class="grid grid-cols-[10rem_1fr_auto] items-center gap-4 px-5 py-3 border-b border-stroke">
               <code class="font-mono text-xs text-fg">{s.class}</code>
               <code class="font-mono text-xs text-fg-muted">{s.height}</code>
-              <span class="text-xs text-fg-muted">{s.px}px</span>
+              <span class="text-xs text-fg-muted">{s.px}</span>
             </div>
             <div class={`${s.class} bg-panel-muted px-5`}>
               <div class="border border-stroke bg-canvas px-3 py-2 text-xs text-fg-muted">Content</div>
