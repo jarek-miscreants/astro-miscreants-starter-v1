@@ -3,6 +3,8 @@ import { Icon } from "astro-icon/components";
 import Logo from "./Logo.astro";
 import Button from "./Button.astro";
 
+// Nav link shapes: plain anchor, simple dropdown menu, or 3-column mega menu.
+// `id` ties a trigger button to its content panel via [data-panel-id].
 type PlainLink = { label: string; href: string };
 type MenuLink = {
   label: string;
@@ -21,10 +23,13 @@ type MegaLink = {
 };
 type NavLink = PlainLink | MenuLink | MegaLink;
 
+// Logo target, primary CTA button, and extra links pinned at the bottom of the mobile drawer.
 const homeHref = "/";
 const cta = { label: "Get a Demo", href: "#" };
 const mobileFooterLinks: PlainLink[] = [{ label: "Log in", href: "#" }];
 
+// Primary nav source of truth — drives both desktop morph panel and mobile accordion.
+// Order here is the visual order in the bar.
 const links: NavLink[] = [
   {
     label: "Products",
@@ -73,25 +78,31 @@ const links: NavLink[] = [
   { label: "Changelog", href: "#" },
 ];
 
+// Subset of links that need a panel rendered (menu + mega). Plain links are skipped.
 const dropdowns = links.filter(
   (l): l is MenuLink | MegaLink =>
     "type" in l && (l.type === "menu" || l.type === "mega")
 );
 ---
 
+{/* Root element — `data-nav-morph` is the JS init hook. Fixed to the top across all breakpoints. */}
 <header
   data-nav-morph
   class="section-grid-outside fixed inset-x-0 top-0 z-50 transition-all duration-300"
 >
+  {/* Optional announcement bar slot (rendered above the nav bar by the parent layout). */}
   <slot name="announcement" />
 
+  {/* The nav bar itself. `data-nav-bar` toggles the .is-scrolled style once the page scrolls > 12px. */}
   <div
     data-nav-bar
     class="col-span-full relative md:col-span-1 md:col-start-3 flex h-14 items-center justify-between border border-stroke bg-canvas/0 transition-all duration-300"
   >
+    {/* Decorative corner accents — invisible until the bar is scrolled. */}
     <div data-accent="tl"></div><div data-accent="tr"></div>
     <div data-accent="bl"></div><div data-accent="br"></div>
 
+    {/* Home / logo link (left side of the bar). */}
     <a
       href={homeHref}
       class="flex items-center px-2 text-fg transition hover:text-intent"
@@ -100,13 +111,17 @@ const dropdowns = links.filter(
       <Logo class="h-5 w-auto" />
     </a>
 
+    {/* Desktop primary nav. Hidden on mobile (the hamburger drawer takes over). */}
     <nav
       class="hidden self-stretch text-sm text-fg-muted md:flex"
       aria-label="Primary"
     >
       {
+        // Render each top-level link. Menu/mega links become trigger buttons that
+        // morph the shared panel below; plain links are simple anchors.
         links.map((link) => {
           if ("type" in link && (link.type === "menu" || link.type === "mega")) {
+            // Dropdown trigger button — `data-panel-id` matches a content block in the panel below.
             return (
               <button
                 type="button"
@@ -115,7 +130,7 @@ const dropdowns = links.filter(
                 aria-haspopup="true"
                 aria-controls="nav-morph-panel"
                 aria-expanded="false"
-                class="flex h-full items-center gap-1 px-4 transition hover:text-fg focus-visible:text-fg outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+                class="flex h-full items-center gap-1 px-4 transition hover:text-fg focus-visible:text-fg outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2  cursor-pointer focus-visible:ring-offset-canvas"
               >
                 {link.label}
                 <Icon
@@ -128,6 +143,7 @@ const dropdowns = links.filter(
             );
           }
 
+          // Plain link (Pricing, Docs, Changelog).
           const plain = link as PlainLink;
           return (
             <a
@@ -141,9 +157,11 @@ const dropdowns = links.filter(
       }
     </nav>
 
+    {/* Right cluster: primary CTA + mobile hamburger toggle. */}
     <div class="flex items-center gap-2 pr-2">
       <Button label={cta.label} href={cta.href} />
 
+      {/* Mobile hamburger — toggles the drawer below. Hidden on md+. */}
       <button
         type="button"
         data-nav-toggle
@@ -169,8 +187,10 @@ const dropdowns = links.filter(
     </div>
   </div>
 
-  <!-- ONE shared morphing panel. Contents are stacked; only one active at a time.
-       The panel itself animates width/height/translateX between dropdowns. -->
+  <!-- Desktop morphing dropdown panel.
+       Single shared container — every dropdown's content is rendered inside, stacked
+       absolutely. Only one is active at a time. The panel itself animates width/height
+       and translateX between triggers, producing the "morph" effect. -->
   <div
     id="nav-morph-panel"
     data-nav-morph-panel
@@ -179,8 +199,10 @@ const dropdowns = links.filter(
     aria-label="Primary menu panel"
     class="pointer-events-none absolute top-full left-0 hidden border border-stroke bg-panel shadow-popover md:block"
   >
+    {/* Viewport clips overflow so the inactive (offset) content blocks aren't visible. */}
     <div data-nav-morph-viewport class="relative h-full overflow-hidden">
       {
+        // One content block per dropdown trigger. JS toggles data-active to switch.
         dropdowns.map((link) => (
           <div
             data-nav-morph-content
@@ -189,6 +211,7 @@ const dropdowns = links.filter(
             class="absolute top-0 left-0"
           >
             {link.type === "menu" ? (
+              // Simple list dropdown (e.g. Company → About / Careers / Blog / Contact).
               <div class="flex w-56 flex-col gap-1 p-2">
                 {link.items.map((item) => (
                   <a
@@ -200,9 +223,11 @@ const dropdowns = links.filter(
                 ))}
               </div>
             ) : (
+              // Mega menu — 3 columns of grouped links with optional descriptions (Products).
               <div class="grid w-[680px] grid-cols-3 gap-8 p-8">
                 {link.columns.map((col) => (
                   <div>
+                    {/* Column heading (Platform / Developers / Resources). */}
                     <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-fg-subtle">
                       {col.heading}
                     </h3>
@@ -231,7 +256,8 @@ const dropdowns = links.filter(
     </div>
   </div>
 
-  <!-- Mobile panel: details/summary pattern, same as Nav.astro -->
+  <!-- Mobile drawer. Uses native <details>/<summary> for each dropdown — no JS needed
+       for accordion expand/collapse. Same link list as the desktop nav. -->
   <div
     id="nav-morph-mobile-panel"
     data-nav-morph-mobile
@@ -241,6 +267,7 @@ const dropdowns = links.filter(
       <nav class="flex flex-col gap-1 text-sm" aria-label="Mobile primary">
         {
           links.map((link) => {
+            // Plain link — direct anchor.
             if (!("type" in link)) {
               return (
                 <a
@@ -252,6 +279,7 @@ const dropdowns = links.filter(
               );
             }
 
+            // Simple dropdown — collapsible list under a summary.
             if (link.type === "menu") {
               return (
                 <details class="group">
@@ -277,6 +305,7 @@ const dropdowns = links.filter(
               );
             }
 
+            // Mega menu — same accordion, but body shows each column's heading + links.
             return (
               <details class="group">
                 <summary class="flex cursor-pointer list-none items-center justify-between px-3 py-2 text-fg-muted transition hover:bg-panel-muted hover:text-fg">
@@ -310,6 +339,7 @@ const dropdowns = links.filter(
             );
           })
         }
+        {/* Footer area inside the mobile drawer (e.g. Log in). */}
         {mobileFooterLinks.length > 0 && <hr class="my-2 border-stroke" />}
         {
           mobileFooterLinks.map((link) => (

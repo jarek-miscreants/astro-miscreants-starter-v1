@@ -14,6 +14,10 @@ import FlowSteps from "../components/FlowSteps.astro";
 import HubspotForm from "../components/HubspotForm.astro";
 import { getCollection, render } from "astro:content";
 import LogoMarquee from "../components/LogoMarquee.astro";
+import Footer from "../components/Footer.astro";
+import SliderBasic from "../components/SliderBasic.astro";
+import SliderBasicMap from "../components/SliderBasicMap.astro";
+import ComboboxGrouped from "../components/ComboboxGrouped.astro";
 import clients from "../data/clients.json";
 
 const faqs = (await getCollection("faq"))
@@ -186,7 +190,7 @@ const faqs = (await getCollection("faq"))
           {faqs.map(async (faq) => {
             const { Content } = await render(faq);
             return (
-              <div data-accordion="item" class="bg-canvas group">
+              <div data-accordion="item" class="bg-canvas border-b border-stroke group">
                 <button data-accordion="button" class="flex w-full items-center justify-between py-5 cursor-pointer text-left group-hover:text-fg">
                   <span class="h5">{faq.data.question}</span>
                   <Icon data-accordion="icon" name="lucide:chevron-down" class="w-5 h-5 text-fg-muted shrink-0" aria-hidden="true" />
@@ -200,6 +204,98 @@ const faqs = (await getCollection("faq"))
             );
           })}
         </Accordion>
+      </SectionMain>
+
+      <SectionMain id="slider-basic" padding="sm" borderTop>
+        <div class="flex flex-col gap-4 mb-6">
+          <h2 class="h3">Slider — manual children</h2>
+          <p class="mt-2 text-fg-muted">CSS scroll-snap carousel. Drop any components in as direct children.</p>
+        </div>
+
+        <SliderBasic mobile={1} mobileLandscape={2} tablet={2} desktop={3} gap="md" ariaLabel="Featured cards">
+          <CardFeatured title="Slide one" titleClass="h4" description="Native scroll-snap means swipe and trackpad inertia work for free." class="bg-panel">
+            <span slot="eyebrow">Performance</span>
+            <Icon slot="icon" name="lucide:zap" class="w-6 h-6 text-fg-muted" aria-hidden="true" />
+          </CardFeatured>
+          <CardFeatured title="Slide two" titleClass="h4" description="Prev/next, keyboard arrows, and pagination dots are all wired up." class="bg-panel">
+            <span slot="eyebrow">Accessibility</span>
+            <Icon slot="icon" name="lucide:keyboard" class="w-6 h-6 text-fg-muted" aria-hidden="true" />
+          </CardFeatured>
+          <CardFeatured title="Slide three" titleClass="h4" description="Zero JS dependencies. Just ~1.5kb of inline script per slider." class="bg-panel">
+            <span slot="eyebrow">Lightweight</span>
+            <Icon slot="icon" name="lucide:feather" class="w-6 h-6 text-fg-muted" aria-hidden="true" />
+          </CardFeatured>
+          <CardFeatured title="Slide four" titleClass="h4" description="Each direct child becomes a slide. No wrapper element required." class="bg-panel">
+            <span slot="eyebrow">DX</span>
+            <Icon slot="icon" name="lucide:wrench" class="w-6 h-6 text-fg-muted" aria-hidden="true" />
+          </CardFeatured>
+        </SliderBasic>
+      </SectionMain>
+
+      <SectionMain id="slider-mapped" padding="sm" borderTop>
+        <div class="flex flex-col gap-4 mb-6">
+          <h2 class="h3">Slider — mapped from data</h2>
+          <p class="mt-2 text-fg-muted">Same component, fed from an array (could be a content collection).</p>
+        </div>
+
+        <SliderBasicMap
+          mobile={1}
+          mobileLandscape={2}
+          tablet={2}
+          desktop={3}
+          gap="md"
+          ariaLabel="Mapped slides"
+          titleClass="h4"
+          titleTag="h4"
+          items={[
+            { eyebrow: "Guide", title: "Getting started",  description: "Spin up a project in under five minutes." },
+            { eyebrow: "Reference", title: "Component API", description: "Props, slots, and data attributes for every component." },
+            { eyebrow: "Tutorial", title: "Build a landing page", description: "Walk through composing sections from the starter kit." },
+            { eyebrow: "Recipes", title: "Theming patterns", description: "Light/dark variants using Tailwind v4 tokens." },
+          ]}
+        />
+      </SectionMain>
+
+      <SectionMain id="combobox" padding="sm" borderTop>
+        <div class="flex flex-col gap-4 mb-6">
+          <h2 class="h3">Combobox — grouped</h2>
+          <p class="mt-2 text-fg-muted">Searchable dropdown with grouped options, full keyboard nav, and form support.</p>
+        </div>
+
+        <div class="max-w-sm">
+          <ComboboxGrouped
+            name="framework"
+            placeholder="Select a framework…"
+            ariaLabel="Choose a framework"
+            groups={[
+              {
+                heading: "Frameworks",
+                items: [
+                  { value: "astro", label: "Astro", description: "Content-focused, ships zero JS by default" },
+                  { value: "nextjs", label: "Next.js", description: "React framework with SSR + static" },
+                  { value: "nuxt", label: "Nuxt", description: "Vue framework with SSR + static" },
+                  { value: "sveltekit", label: "SvelteKit", description: "Svelte's official meta-framework" },
+                ],
+              },
+              {
+                heading: "Styling",
+                items: [
+                  { value: "tailwind", label: "Tailwind CSS", description: "Utility-first CSS framework" },
+                  { value: "vanilla-extract", label: "vanilla-extract", description: "Type-safe CSS-in-TS" },
+                  { value: "css-modules", label: "CSS Modules", description: "Scoped class names" },
+                ],
+              },
+              {
+                heading: "Bundlers",
+                items: [
+                  { value: "vite", label: "Vite", description: "ESM-native dev server" },
+                  { value: "esbuild", label: "esbuild", description: "Go-based, very fast" },
+                  { value: "rollup", label: "Rollup", description: "Library-friendly bundler", disabled: true },
+                ],
+              },
+            ]}
+          />
+        </div>
       </SectionMain>
 
       <SectionMain id="flow-steps" padding="none" contentPadding="none" borderTop>
@@ -287,13 +383,8 @@ const faqs = (await getCollection("faq"))
         </FlowSteps>
       </SectionMain>
 
-      <SectionMain id="hubspot-form" padding="sm" borderTop>
-        <div data-accent="tl"></div>
-        <div data-accent="tr"></div>
-        <div data-accent="bl"></div>
-        <div data-accent="br"></div>
-        <HubspotForm formId="34f97be6-a435-4a54-a676-371efe148e70" />
-      </SectionMain>
+
 
     </main>
+    <Footer />
   </Layout>
