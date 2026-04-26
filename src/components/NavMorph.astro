@@ -1,6 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
-import Logo from "./Logo.astro";
+import LogoMenu from "./LogoMenu.astro";
 import Button from "./Button.astro";
 
 // Nav link shapes: plain anchor, simple dropdown menu, or 3-column mega menu.
@@ -103,14 +103,9 @@ const dropdowns = links.filter(
     <div data-accent="tl"></div><div data-accent="tr"></div>
     <div data-accent="bl"></div><div data-accent="br"></div>
 
-    {/* Home / logo link (left side of the bar). */}
-    <a
-      href={homeHref}
-      class="flex items-center px-2 text-fg transition hover:text-intent"
-      aria-label="Home"
-    >
-      <Logo class="h-5 w-auto" />
-    </a>
+    {/* Home / logo link (left side of the bar). Right-click opens brand menu. */}
+    <LogoMenu href={homeHref} class="px-2" logoClass="h-5 w-auto" />
+
 
     {/* Desktop primary nav. Hidden on mobile (the hamburger drawer takes over). */}
     <nav

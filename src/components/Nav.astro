@@ -1,6 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
-import Logo from "./Logo.astro";
+import LogoMenu from "./LogoMenu.astro";
 import Button from "./Button.astro";
 
 type PlainLink = { label: string; href: string };
@@ -91,13 +91,8 @@ const megaLinks = links.filter(
     <div data-accent="tl"></div><div data-accent="tr"></div>
     <div data-accent="bl"></div><div data-accent="br"></div>
 
-    <a
-      href={homeHref}
-      class="flex items-center px-2 text-fg transition hover:text-intent"
-      aria-label="Home"
-    >
-      <Logo class="h-5 w-auto" />
-    </a>
+    <LogoMenu href={homeHref} class="px-2" logoClass="h-5 w-auto" />
+
 
     <nav
       class="hidden self-stretch text-sm text-fg-muted md:flex"

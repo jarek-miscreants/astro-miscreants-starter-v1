@@ -262,6 +262,22 @@
     /* Offset anchor-link scrolls so targets land below the fixed nav. */
     scroll-padding-top: 6rem;
   }
+  /* Project rule: every interactive control gets the pointer cursor. Tailwind v4
+     ships `cursor: default` on `<button>` by default, which feels inert. We
+     restore `pointer` for buttons, links, role=button/menuitem, and summary —
+     except when explicitly disabled. */
+  :where(
+    a[href],
+    button:not(:disabled),
+    [role="button"]:not([aria-disabled="true"]),
+    [role="menuitem"]:not([aria-disabled="true"]),
+    summary
+  ) {
+    cursor: pointer;
+  }
+  :where(button:disabled, [aria-disabled="true"]) {
+    cursor: not-allowed;
+  }
 }
 
 /* ==========================================================================
