@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import SectionMain from "../../components/SectionMain.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import { getCollection, render } from "astro:content";
 
 export async function getStaticPaths() {
@@ -25,11 +26,13 @@ const siblings = all
 <Layout title={`${entry.data.title} — Components`}>
   <main id="main" class="border-y border-stroke">
     <SectionMain id="component-header" paddingTop="lg" paddingBottom="sm" contentPadding="default">
-      <div class="flex flex-wrap items-center gap-2 mb-4 text-xs uppercase tracking-wider text-fg-subtle">
-        <a href="/components/" class="hover:text-fg transition">Components</a>
-        <span>/</span>
-        <span>{entry.data.category}</span>
-      </div>
+      <Breadcrumbs
+        class="mb-4"
+        items={[
+          { label: "Components", href: "/components/" },
+          { label: entry.data.title },
+        ]}
+      />
       <h1 class="h2">{entry.data.title}</h1>
       <p class="mt-3 max-w-prose text-fg-muted">{entry.data.description}</p>
       <p class="mt-4 text-xs text-fg-subtle">
