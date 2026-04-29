@@ -6,7 +6,7 @@ import Button from "../../components/Button.astro";
 
 const all = await getCollection("components");
 
-// Group by category, then sort each group by `order` (then title as tie-break).
+// Group by category, then sort each group alphabetically by title.
 const categoryOrder = ["primitive", "block", "pattern", "layout", "form"] as const;
 const categoryLabels: Record<typeof categoryOrder[number], string> = {
   primitive: "Primitives",
@@ -22,7 +22,7 @@ const groups = categoryOrder
     label: categoryLabels[cat],
     items: all
       .filter((c) => c.data.category === cat)
-      .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title)),
+      .sort((a, b) => a.data.title.localeCompare(b.data.title)),
   }))
   .filter((g) => g.items.length > 0);
 ---
