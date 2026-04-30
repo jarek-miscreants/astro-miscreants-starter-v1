@@ -97,7 +97,7 @@ const dropdowns = links.filter(
   {/* The nav bar itself. `data-nav-bar` toggles the .is-scrolled style once the page scrolls > 12px. */}
   <div
     data-nav-bar
-    class="col-span-full relative md:col-span-1 md:col-start-3 flex h-14 items-center justify-between border border-stroke bg-canvas/0 transition-all duration-300"
+    class="col-start-3 px-4 relative flex h-14 items-center justify-between border border-stroke bg-canvas/0 transition-all duration-300"
   >
     {/* Decorative corner accents — invisible until the bar is scrolled. */}
     <div data-accent="tl"></div><div data-accent="tr"></div>
@@ -155,7 +155,10 @@ const dropdowns = links.filter(
 
     {/* Right cluster: primary CTA + mobile hamburger toggle. */}
     <div class="flex items-center gap-2 pr-2">
-      <Button label={cta.label} href={cta.href} />
+      {/* CTA hidden on mobile — moved into the hamburger drawer to free up bar space. */}
+      <div class="hidden md:flex">
+        <Button label={cta.label} href={cta.href} />
+      </div>
 
       {/* Mobile hamburger — toggles the drawer below. Hidden on md+. */}
       <button
@@ -347,6 +350,11 @@ const dropdowns = links.filter(
             </a>
           ))
         }
+        {/* Primary CTA at the bottom of the drawer — full-width so it reads as
+            an action, not a list item. */}
+        <div class="mt-3">
+          <Button label={cta.label} href={cta.href} class="w-full" />
+        </div>
       </nav>
     </div>
   </div>

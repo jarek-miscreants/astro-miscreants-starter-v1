@@ -160,7 +160,9 @@ const megaLinks = links.filter(
     </nav>
 
     <div class="flex items-center gap-2 pr-2">
-      <Button label={cta.label} href={cta.href} />
+      <div class="hidden md:flex">
+        <Button label={cta.label} href={cta.href} />
+      </div>
 
       <button
         type="button"
@@ -317,6 +319,9 @@ const megaLinks = links.filter(
             </a>
           ))
         }
+        <div class="mt-3">
+          <Button label={cta.label} href={cta.href} class="w-full justify-center" />
+        </div>
       </nav>
     </div>
   </div>
