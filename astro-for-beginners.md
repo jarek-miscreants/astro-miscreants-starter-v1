@@ -44,6 +44,8 @@ A practical guide to Astro 6 + Tailwind 4, written from a real learning conversa
 36. [Navigation patterns — from basic nav to dropdowns + mega menus](#36-navigation-patterns--from-basic-nav-to-dropdowns--mega-menus)
 37. [Sharing config between components (Nav + Footer)](#37-sharing-config-between-components-nav--footer)
 38. [Forwarding HTML attributes on wrapper components](#38-forwarding-html-attributes-on-wrapper-components)
+39. [MDX & component showcase pages](#39-mdx--component-showcase-pages)
+40. [Components with subpieces — when and how to split](#40-components-with-subpieces--when-and-how-to-split)
 
 ---
 
@@ -4960,3 +4962,437 @@ The passthrough pattern is one of three layers that together make feature-rich w
 Miss any one of them and the pattern doesn't work. Type surface without capture: TypeScript is happy but the attrs still vanish. Capture without spread: attrs sit unused in a variable. Spread without type surface: the editor underlines the caller.
 
 Once you internalize the pattern, you'll reach for it instinctively on every new wrapper component — and stop being surprised that `id` and `data-*` "don't work" on your custom components.
+
+---
+
+## 39. MDX & component showcase pages
+
+When you start building a starter with more than ~10 components, you'll want a way to *browse* them — see what's in the kit, read each one's API, and (crucially) see them rendered live. The `/components/` route in this project is built from three Astro features working together: **content collections**, **MDX**, and **dynamic routes**. Each does one job. This section walks through how they compose.
+
+### Why this is hard without MDX
+
+The first instinct most people have for component documentation is "I'll write a markdown file per component, plus a separate playground page." That gets you docs + live demos, but they're disconnected: the markdown describes the component, the playground renders it, and they drift over time. The example in the docs claims a prop exists; the playground uses a renamed version. Six months in, you can't tell which is current.
+
+MDX collapses this into a single file. The doc *is* the demo — you `import` the actual component into the markdown and render it inline next to its prose description. There's no second source of truth to keep in sync.
+
+### What MDX actually is
+
+MDX is a file format: **Markdown body + JSX-style component tags + ES module imports at the top**. The Markdown still works exactly like a normal `.md` file — headings, paragraphs, lists, code fences, tables — but you can also write JSX-flavored markup that renders real components.
+
+A typical entry in this project's showcase:
+
+```mdx
+---
+title: AccordionMorph
+description: Native <details> accordion with a bouncy spring animation.
+category: pattern
+order: 30
+sourceFile: src/components/AccordionMorph.astro
+status: stable
+related: []
+---
+
+import Preview from "@components/_docs/Preview.astro";
+import AccordionMorph from "@components/AccordionMorph.astro";
+
+A native `<details>` accordion with mutually-exclusive open via shared `name`.
+
+## Preview
+
+<Preview label="Default">
+  <AccordionMorph items={[
+    { title: "Item one", description: "…" },
+    { title: "Item two", description: "…" },
+  ]} />
+</Preview>
+
+## Why native `<details>`
+
+Native `<details>` gives you keyboard, focus, and screen-reader semantics for free.
+```
+
+Three regions to spot:
+
+1. **Frontmatter** — the YAML between `---` markers. Becomes `entry.data` when you query the collection.
+2. **Imports** — real ES module imports, same as in any `.astro` or `.tsx` file. The `@components/*` path alias keeps them short.
+3. **The body** — mixed Markdown prose and JSX-style tags. `<Preview>` and `<AccordionMorph>` aren't escaped HTML — they're real components that mount when the page renders, with all their CSS and JS intact.
+
+To enable MDX in an Astro project, you install the integration once:
+
+```bash
+npx astro add mdx --yes
+```
+
+That adds `@astrojs/mdx` to `package.json` and registers `mdx()` in `astro.config.mjs`. After that, any `.mdx` file in `src/content/` or `src/pages/` is recognized.
+
+### Step 1 — Define a content collection
+
+Content collections are Astro's "typed folder of content" feature. You declare in `src/content.config.ts` that a folder of MDX files matches a particular shape:
+
+```ts
+import { defineCollection, z } from "astro:content";
+import { glob } from "astro/loaders";
+
+const components = defineCollection({
+  loader: glob({ pattern: "**/*.mdx", base: "./src/content/components" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    category: z.enum(["primitive", "block", "pattern", "layout", "form"]),
+    order: z.number().default(100),
+    sourceFile: z.string(),
+    status: z.enum(["stable", "adaptable", "per-project"]).default("stable"),
+    related: z.array(z.string()).default([]),
+  }),
+});
+
+export const collections = { components };
+```
+
+The `loader` tells Astro where to find the files; the `schema` describes the frontmatter Zod-style. Two important consequences:
+
+- If a file's frontmatter doesn't match the schema, the build fails with an error pointing at the offending file. Adding a typo to a category enum is caught immediately.
+- The TypeScript types for `entry.data` are generated automatically — autocomplete works inside `index.astro` and `[...slug].astro`.
+
+### Step 2 — Generate one page per entry with a dynamic route
+
+Astro creates one HTML page per `.astro` file in `src/pages/`. Most pages are static (`pages/about.astro` → `/about`). When you want *N* pages generated from data, you use a **dynamic route** — a filename with square brackets:
+
+```
+src/pages/components/[...slug].astro
+```
+
+The `...` is the rest segment — it matches any path, including slashes. The route handler is then responsible for telling Astro which slugs exist:
+
+```astro
+---
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const all = await getCollection("components");
+  return all.map((entry) => ({
+    params: { slug: entry.id },     // → URL becomes /components/<slug>
+    props: { entry },               // → passed to this page as Astro.props
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<Layout title={entry.data.title}>
+  <h1>{entry.data.title}</h1>
+  <p>{entry.data.description}</p>
+
+  <article class="prose-doc">
+    <Content />
+  </article>
+</Layout>
+```
+
+Two parts that do the heavy lifting:
+
+- **`getStaticPaths`** runs at build time. Every object it returns becomes one generated page. The `params` define the URL, the `props` flow into the page as `Astro.props`.
+- **`render(entry)`** turns the MDX body into a renderable Astro component called `Content`. Dropping `<Content />` in the template renders the markdown + all the embedded `<Preview>` / `<AccordionMorph>` / etc. components.
+
+Astro evaluates `getStaticPaths` once at dev-server start. The runtime gotcha: **adding a new `.mdx` file mid-session means visiting its URL gives a 404 until you restart `npm run dev`.** Edits to existing files hot-reload fine — only the path-generation step needs the restart.
+
+### Step 3 — The index page
+
+The index is simpler. It reads frontmatter from every entry, groups by category, and renders a card grid. No MDX rendering involved — only `entry.data`:
+
+```astro
+---
+import { getCollection } from "astro:content";
+
+const all = await getCollection("components");
+const categoryOrder = ["primitive", "block", "pattern", "layout", "form"] as const;
+
+const groups = categoryOrder.map((cat) => ({
+  category: cat,
+  items: all
+    .filter((c) => c.data.category === cat)
+    .sort((a, b) => a.data.order - b.data.order),
+})).filter((g) => g.items.length > 0);
+---
+
+{groups.map((group) => (
+  <section>
+    <h2>{group.category}</h2>
+    <ul>
+      {group.items.map((item) => (
+        <li>
+          <a href={`/components/${item.id}/`}>
+            <h3>{item.data.title}</h3>
+            <p>{item.data.description}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+))}
+```
+
+Adding a new component is just a new `.mdx` file — the index picks it up automatically because it's iterating over the whole collection.
+
+### Step 4 — The doc-only helpers (`Preview`, `PropsTable`)
+
+These are normal Astro components in `src/components/_docs/`. The leading underscore is a convention: it makes the folder visually distinct from the public components, and you can use it in conventions/scripts to skip the folder when listing "real" components.
+
+`Preview.astro` wraps a slot in a labeled, framed container so live demos stand out from prose:
+
+```astro
+<figure class="not-prose my-6 border border-stroke bg-canvas">
+  <figcaption>{label}</figcaption>
+  <div class="p-8 flex items-center justify-center">
+    <slot />
+  </div>
+</figure>
+```
+
+The `not-prose` class is important — it's the opt-out marker for prose styles. Inside the detail page, every `.prose-doc` selector wraps its target with `:not(:where(.not-prose, .not-prose *))` so prose rules don't bleed into live demos. Without that, an embedded `<AnnouncementBanner>` (with its dark `bg-intent` and white `text-fg-on-intent` link) would get its anchor color overridden by `.prose-doc a` and produce dark-on-dark text.
+
+`PropsTable.astro` accepts a structured array and renders a consistent table — replacing hand-rolled markdown tables that drift in formatting:
+
+```astro
+<PropsTable props={[
+  { name: "items", type: "Item[]", required: true, description: "…" },
+  { name: "name", type: "string", default: "random", description: "…" },
+]} />
+```
+
+Standard prop fields (`name`, `type`, `default`, `description`, `required`) keep every component's docs structurally identical.
+
+### Step 5 — `prose-doc` styling for MDX bodies
+
+MDX renders markdown to plain HTML — `<h2>`, `<p>`, `<table>`, etc. — without any default styling. You can either install Tailwind Typography or write your own `.prose-doc` rules. This project does the latter, in a `<style is:global>` block on `[...slug].astro`:
+
+```css
+.prose-doc :where(h2):not(:where(.not-prose, .not-prose *)) {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 2.5rem;
+}
+.prose-doc :where(p):not(:where(.not-prose, .not-prose *)) {
+  margin: 0.875rem 0;
+  color: var(--color-fg-muted);
+  line-height: 1.65;
+}
+.prose-doc :where(a):not(:where(.not-prose, .not-prose *)) {
+  color: var(--color-fg);
+  text-decoration: underline;
+}
+```
+
+The `:where()` keeps specificity at 0 so a live component's own styling always wins. The `:not(:where(.not-prose, .not-prose *))` clause is the Tailwind Typography opt-out pattern — it's what makes prose styles politely stop at the `<Preview>` boundary.
+
+### Mobile overflow gotcha
+
+The article wrapping `<Content />` ends up as a flex item inside SectionMain's flex content column. Flex items default to `min-width: auto`, which means they grow to fit their largest min-content child — long inline code, type signatures, wide tables. On a 375px viewport this pushes the article past the viewport edge.
+
+The fix lives on `.prose-doc` itself:
+
+```css
+.prose-doc {
+  width: 100%;
+  min-width: 0;     /* let the article shrink to its parent */
+  max-width: 100%;
+}
+.prose-doc :where(p, li) > :where(code) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+```
+
+`min-width: 0` releases the flex-item-grows-to-fit-content trap. `overflow-wrap: anywhere` lets long type strings wrap mid-word instead of forcing wider layout. Wide tables still scroll horizontally inside `PropsTable`'s `overflow-x-auto` wrapper — that's intentional, not page-level overflow.
+
+### The whole pipeline, one diagram
+
+```
+src/content.config.ts          ← schema for components collection
+        │
+        ▼
+src/content/components/        ← one .mdx file per component
+  ├ accordion-morph.mdx
+  ├ button.mdx                   each has frontmatter + live demos
+  ├ modal.mdx                    in <Preview> blocks
+  └ …
+        │
+        ├─→ getCollection("components")
+        │           │
+        │           ▼
+        │   src/pages/components/index.astro     ← reads only frontmatter
+        │                                          renders a card grid
+        │
+        └─→ getStaticPaths() in [...slug].astro
+                    │
+                    ▼  for each entry:
+                    1. params.slug = entry.id        ← URL
+                    2. const { Content } = await render(entry)
+                    3. <Content />                   ← MDX body renders
+```
+
+### What this approach is good at
+
+- **Single source of truth.** Frontmatter drives the index, the detail page reads `entry.data`, the demo body lives in the same file.
+- **Live demos always match the component.** Change a prop's name and the doc breaks at build time (with the schema-validation error pointing at the file), instead of silently lying.
+- **Adding a component = creating one file.** No central registry to update, no route definitions to maintain.
+- **Components are real Astro/JS imports**, so they ship with their actual styles, scripts, and ARIA wiring — not screenshots, not iframes.
+
+### When this approach is wrong
+
+- **Truly interactive playgrounds** with prop controls (the Storybook "controls" panel) are out of scope. MDX renders one canonical example per `<Preview>`. If you need users to drag sliders to tweak props, build a separate playground page or use Storybook for that.
+- **Hundreds of pages of API docs** auto-generated from TypeScript would benefit from a dedicated tool like Typedoc instead of hand-written MDX.
+- **Visual regression testing** isn't built in. The previews are real components, but if you want screenshot diffing across PRs, you'll layer Chromatic or Playwright on top.
+
+### Adding a new component to the showcase
+
+The full recipe, in order:
+
+1. Create `src/components/<MyComponent>.astro`.
+2. Create `src/content/components/<my-component>.mdx`. Add the frontmatter (title, description, category, order, sourceFile, status, related). Add `import` lines for `Preview`, `PropsTable`, and your component. Write the body — start with a `<Preview>` block showing the live component.
+3. Restart `npm run dev` so `getStaticPaths` picks up the new slug. Edits to the file after the restart hot-reload fine.
+4. Visit `/components/<my-component>/` to verify, and `/components/` to see it appear in the right category section.
+
+That's it. No registry update, no route file edit, no manual list to maintain. Frontmatter drives everything.
+
+---
+
+## 40. Components with subpieces — when and how to split
+
+Most components in this starter are single files: one `.astro` with frontmatter, markup, scoped style, scoped script. That's the right default. But occasionally you'll write a component that genuinely benefits from being broken into pieces — and there are roughly **four shapes** of "component with subpieces," each with a different reason for splitting. The choice depends on *how the consumer uses the thing*, not just on file size.
+
+### Shape 1 — Compound components (consumer composes the parts)
+
+The classic shadcn / Radix pattern. The wrapper provides shared state and styling; the subpieces are the explicit slots the consumer arranges in any order:
+
+```astro
+<Card>
+  <Card.Header>
+    <Card.Title>Pricing</Card.Title>
+    <Card.Description>Pick a plan</Card.Description>
+  </Card.Header>
+  <Card.Body>
+    <p>…</p>
+  </Card.Body>
+  <Card.Footer>
+    <Button>Continue</Button>
+  </Card.Footer>
+</Card>
+```
+
+**File layout:**
+```
+src/components/
+  Card/
+    index.astro          ← the parent <Card>
+    Header.astro
+    Title.astro
+    Description.astro
+    Body.astro
+    Footer.astro
+```
+
+**Why split:** the consumer needs control over *which* parts appear and *in what order*. A monolithic `Card` with `title`, `description`, `body`, `footer` props would force a fixed structure — what if you want two titles, or a description above the title? Subpieces let consumers compose freely.
+
+**Astro-specific catch:** Astro doesn't have first-class dot syntax for namespaced components like React's `Card.Header`. You either:
+- Import each piece separately: `import { Card, CardHeader, CardTitle } from "@components/Card"` — cleaner imports but more typing.
+- Skip dot syntax and have callers import each file directly. Mostly stylistic.
+
+This pattern shines when you need **>3 visually-distinct slots** that can appear in any order. Below 3, plain named `<slot>` attributes on a single component are simpler.
+
+### Shape 2 — Internal subdivisions (parent composes the parts)
+
+The opposite of compound: the consumer interacts with one component, but internally it's split because some pieces have non-trivial logic worth isolating.
+
+```astro
+<Tabs id="demo" items={[…]}>
+  <slot />
+</Tabs>
+```
+
+```
+src/components/
+  Tabs.astro                ← public entry point
+  Tabs/
+    _TabList.astro          ← renders the tab buttons row
+    _TabPanel.astro         ← renders one panel with transition logic
+    _useTabsState.ts        ← controller / event wiring
+```
+
+**Why split:** the parent has too much going on (URL deep-linking, GSAP slide animations, accordion conversion on mobile) and reading 600 lines of one file is harder than 200 + 200 + 200. The underscore prefix on the inner files signals "private to `Tabs` — don't import directly."
+
+**The honest test for whether this is worth doing:** if a teammate asks "where does the panel-slide animation live?", can they jump straight to the right file from the directory listing? If yes, the split paid off. If they have to grep across multiple files anyway, the split was bookkeeping, not clarity.
+
+### Shape 3 — Variant pieces (sibling components sharing a prefix)
+
+Multiple visually distinct components that are conceptually related but used independently:
+
+```
+src/components/
+  Card/
+    Featured.astro       ← <CardFeatured>
+    Icon.astro           ← <CardIcon>
+    Stat.astro           ← <CardStat>
+    Pricing.astro        ← <CardPricing>
+```
+
+**Imports:**
+```ts
+import CardFeatured from "@components/Card/Featured.astro";
+import CardIcon from "@components/Card/Icon.astro";
+```
+
+**Why split:** alphabetical grouping at the file level. `CardFeatured`, `CardIcon`, `CardStat` are all "kinds of cards" — keeping them in a folder makes the relationship visible without forcing actual code sharing between them.
+
+This is exactly what this starter already does at the *flat* level via naming prefix: `CardFeatured.astro`, `CardIcon.astro` already group alphabetically in a flat folder. The folder version is the next step up if you grow to 5+ card variants and want them visually pulled together. Flat + naming convention is fine until then. (This is the same "how big before you fold into folders" question covered earlier in the guide — see the discussion of the `@components/*` path alias.)
+
+### Shape 4 — Layout decomposition (pieces too coupled to be reusable)
+
+A complex component (`Nav`, `Footer`, `Hero`) split internally only because the parent file would otherwise be unreadable, but where the pieces have no meaning outside the parent:
+
+```
+src/components/
+  NavMorph.astro
+  NavMorph/
+    _logic.ts              ← the big morph script (300 lines)
+    _MobileDrawer.astro    ← the hamburger drawer subview
+```
+
+**Why split:** the morph logic is 300 lines of pointer events, IntersectionObserver, focus traps. Inlining it in `NavMorph.astro` works but pushes the markup off-screen. Extracting it as `_logic.ts` and importing the `init` function back into `<script>` keeps the markup readable.
+
+**The boundary test:** could `_MobileDrawer` ever be used without `NavMorph` rendering around it? If yes, it's not really a subpiece — promote it to a top-level component. If no, the underscore + folder placement keeps it tied to its only consumer.
+
+### When *not* to split
+
+The trap is splitting too eagerly. Three signals you've over-decomposed:
+
+1. **Every "subpiece" file is < 30 lines.** You've turned one cohesive thing into a treasure hunt. Inline it back.
+2. **The parent file is mostly imports + composition with no logic of its own.** You moved code around without reducing complexity. Sometimes the right answer is one bigger file.
+3. **You can't name a subpiece without referring to the parent** ("the inner card's footer's icon"). The boundaries are arbitrary — keep it a single component until you can name independent concepts.
+
+### A heuristic for picking shape
+
+Ask: **who's making the layout decisions?**
+
+- If the *consumer* arranges the parts → **compound (1)**: subpieces are public, named, importable.
+- If the *parent* arranges the parts → **internal (2 or 4)**: subpieces are private, underscore-prefixed, not exported.
+- If the parts are *independent siblings* → **variants (3)**: each is its own public component, folder is purely organizational.
+
+### Concrete examples that fit this starter
+
+If you ever decompose any of the components in this starter, here's what each shape would probably look like:
+
+- **`FlowSteps`** could become a compound (`FlowSteps`, `FlowSteps.Step`, `FlowSteps.Panel`) — the consumer is currently tied to a fixed prop shape, and a compound API would let them write panels with arbitrary inner content using subcomponents instead of named slots. Worth doing only if you keep wanting to break out of the slot constraints.
+
+- **`Tabs`** is already pushing 300 lines and could be type 2 — the public surface stays one component, but the GSAP timeline logic could move to `Tabs/_animate.ts` for readability.
+
+- **`Modal`** could become type 4 if you ever add a `Drawer` variant — `Drawer.astro` and `Modal.astro` would share `_dialog.ts` for the focus-trap and Esc-to-close logic without duplicating it.
+
+- **All `Card*` components** are currently flat with naming prefix and that's the right call. Promoting them to a `Card/` folder would only matter if you grew to ~6 variants and started feeling that the alphabetical sort wasn't enough grouping.
+
+### The meta-rule
+
+Most components don't need subpieces. **Split when the file has more than one meaningful concept and a future reader couldn't find them quickly.** Don't split because the file is "long" — line count alone is a poor signal. A 400-line component with one cohesive concept is easier to read than a 50-line orchestrator that imports six 50-line subcomponents from a folder.
+
+The underscore-folder convention is your "I'd promote these later if they earned it" signal. Until then, keep things flat and reach for the split only when an actual pain point — readability, locality of related logic, or shared state across siblings — justifies it.

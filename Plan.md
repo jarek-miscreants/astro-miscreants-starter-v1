@@ -182,6 +182,81 @@ The only friction: consumer projects with their own marketing pages will want `/
 - Does the live preview support multiple variants per component (like Storybook stories), or just one canonical example? (One canonical for v1; multiple later if needed.)
 - Should `index.astro` still demo *anything*? (Maybe the hero + one block, with everything else moved.)
 
+## Component roadmap
+
+Brainstorm of components that recur across multi-build Astro work, grouped by frequency-of-need. Existing components (Tabs, Accordion, Modal, Dropdown, Media, Cards, Nav, Footer, FlowSteps, FilterBar, ComboboxGrouped, Slider, LogoMarquee, HubspotForm, Breadcrumbs, AnimatedTags, ButtonGroup, Button, Logo, LogoMenu, ShinyButton, Icon, HeroCanvas, FeatureScrollSpy, Grid, SectionMain, Layout, Clickable) are not re-listed.
+
+### Almost certainly needed on every project
+
+- **Toast / Notifier** — single primitive any code can call (`window.toast("Saved")`) to show a transient message. Built on `<output>` + `aria-live` patterns. Solves the "I added a form, now what about feedback?" gap.
+- **Tooltip** — popover-API based (same foundation as Dropdown). Hover + focus to open, Escape to close, anchored to trigger.
+- **Form** — thin `<Form>` wrapper around `<form>`. Progressive enhancement (works without JS), client-side validation messages with `aria-describedby`, submission state (`data-form-status="submitting|success|error"`), honeypot, success/error region.
+- **Field** — labeled input row with built-in error message slot, `aria-describedby` wiring, optional helper text. Wraps `<input>`, `<textarea>`, `<select>` uniformly.
+- **CodeBlock** — wraps `<Code />` from `astro:components` with copy-to-clipboard, language label, optional line highlighting, optional line numbers.
+- **CopyButton** — tiny but extracted. Shares "copied!" feedback with toast pattern.
+- **Drawer** — Modal's sibling. Slide-in from edge (left/right/bottom), same a11y posture as Modal but used for nav/filters on mobile, side panels on desktop.
+- **Pagination** — page-N-of-M with prev/next + numeric pages, keyboard-navigable, ARIA `role="navigation"` + `aria-label`, with "show more" alternative form.
+
+### Frequently needed on content sites
+
+- **Card (generic)** — base card with header/media/body/footer slots. Specialized `CardFeatured` and `CardIcon` already exist.
+- **CTA / Banner** — full-width promo strip, dismissible variant. Different from `AnnouncementBanner` (which is the top strip).
+- **Stat** — number + label + delta arrow, with `tabular-nums` and optional sparkline.
+- **PriceTable** — pricing tier card grid.
+- **ComparisonTable** — feature × tier matrix with sticky header row, mobile collapse.
+- **Testimonial** — quote + author + role + photo + optional logo.
+- **TestimonialMarquee / Wall** — `LogoMarquee`-style pattern with text cards.
+- **Avatar** — image + initials fallback + optional online indicator + size variants.
+- **Badge / Tag** — status chip with color variants from semantic tokens.
+- **VideoEmbed** — YouTube/Vimeo with click-to-load thumbnail (no third-party JS until activated). Different from `Media` (self-hosted MP4).
+- **Carousel / SliderTouch** — touch-aware, snap-scroll, peek-next-card carousel. `SliderBasic` exists already.
+- **Newsletter** — input + button, success/error states, integration-agnostic.
+- **CookieBanner** — GDPR-aware consent strip, persisted in localStorage.
+- **ScrollProgress** — top-of-page reading progress bar.
+- **TableOfContents** — auto-generated from headings, with active-section highlight on scroll.
+
+### Marketing / landing-page specific
+
+- **HeroSplit** — left text / right media split layout. Sibling to `HeroCanvas`.
+- **FeatureGrid** — N×M grid of icon + title + description.
+- **LogoCloud** — static counterpart to `LogoMarquee`.
+- **TimelineVertical** — `FlowSteps` may already cover this; check.
+- **CaseStudyCard** — testimonial + result stats + customer logo bundle.
+- **CTA (bottom-of-page)** — distinct from a generic banner: full-bleed, single headline, primary action.
+
+### Data-heavy / app surfaces (only if needed)
+
+- **DataTable** — sortable columns, sticky header, row selection. Big lift; only build if actually needed.
+- **EmptyState** — illustration + heading + description + action.
+- **CommandPalette** — `Cmd+K` overlay with fuzzy search. Skip unless docs.
+- **DateRangePicker** — extremely client-specific, expensive to build well, native `<input type="date">` covers 80%. Skip in starter.
+
+### Layout / composition primitives
+
+- **Stack / Cluster / Grid** — composition utilities. Tailwind covers via classes; component form is optional.
+- **Reveal** — IntersectionObserver fade/slide-in on scroll. Wraps any element, opt-out via `prefers-reduced-motion`.
+- **Marquee** — generalize `LogoMarquee` to accept any children.
+- **Section** — wraps the existing `section-gutter`/`section-padding`/`theme` utilities.
+- **ThemeToggle** — flips `data-theme` on `<html>` between light/dark/brand. Persists in localStorage.
+
+### Highest-ROI subset
+
+1. **Toast + Form + Field** — form-feedback trio. Touches every client.
+2. **Tooltip** — same Popover-API foundation as Dropdown; cheap to add now.
+3. **CodeBlock + CopyButton** — instant doc-site polish.
+4. **Drawer** — completes the overlay set (Modal + Drawer + Dropdown + Tooltip).
+5. **Pagination + EmptyState** — list-page pair.
+
+### What to skip in the starter
+
+- DataTable, CommandPalette, DateRangePicker — too client-specific, easy to over-engineer, low reuse.
+- Stack/Cluster/Grid as components — Tailwind utilities are sufficient.
+- Project-specific GSAP timelines — those belong in the project, not the starter.
+
+### Current iteration
+
+User-selected highest-ROI pass: **Tooltip, CodeBlock, TableOfContents, Form/Field, Tag, Pagination.**
+
 ## Long-term: shadcn-style component registry
 
 **Status:** Not yet relevant. Revisit only after running 4–5 projects off the template and noticing that "copy the whole starter" is too coarse.

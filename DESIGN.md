@@ -205,7 +205,9 @@ Hairline borders (`1px solid var(--color-stroke)`) carry separation where tonal 
 
 ## Shapes
 
-Minimal corner softening. Most structural elements are sharp (`rounded-none` or `rounded-sm`); interactive atoms pick up `rounded-md`; cards and popovers use a bespoke `card` radius (`0.875rem`) that reads as deliberately non-standard. Two pill shapes (`pill` = `9999px`) are reserved for navigation bars and pill buttons, where the full round is the visual signature, not decorative.
+**This build does not use rounded corners.** Every surface — cards, popovers, inputs, buttons, tags, code blocks, tooltips, pagination items — is a sharp rectangle (`border-radius: 0`). Pills, the bespoke `card` radius, and any `rounded-*` Tailwind utility are off the table for this project. The reasoning is editorial: corner softening reads as decorative warmth, and this brand is engineering-forward and precise — sharp rectangles match the typography's tight tracking and the monochrome palette's directness.
+
+If a component definition or a doc preview uses `rounded-md`, `rounded-card`, `rounded-pill`, or sets `border-radius` in a `<style>` block, it should be removed before merge. The token values defined in `global.css` (`--radius-card`, `--radius-pill`) remain in the design system as historical defaults but are not consumed.
 
 Decorative corner accents — 6 × 6 px L-shaped hairlines anchored to `[data-accent="tl|tr|bl|br"]` — mark high-priority sections (hero boundaries, featured cards). They inherit colour from `--accent-line`, which has its own light/dark override.
 
