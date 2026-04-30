@@ -86,6 +86,135 @@ Each page button is a real anchor — no JS required, works offline, plays nicel
 
 Listen on the wrapper (or any ancestor — the event bubbles). The event is `cancelable` — call `preventDefault()` to manage state externally before letting the component update its own `data-pagination-current` attribute.
 
+## Wiring to a content collection (blog, docs, changelog…)
+
+Astro has a built-in `paginate()` helper that splits any array into page-sized chunks and generates one route per page. Combined with this component, that gives you a full paginated archive with stable URLs — `/blog/`, `/blog/2/`, `/blog/3/` — that work without JavaScript.
+
+### 1. Define the collection
+
+`src/content.config.ts`:
+
+```ts
+import { defineCollection, z } from "astro:content";
+import { glob } from "astro/loaders";
+
+const blog = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/blog" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    date: z.coerce.date(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { blog };
+```
+
+### 2. Create the paginated route
+
+`src/pages/blog/[...page].astro` — the `[...page]` rest segment is what makes Astro generate `/blog/`, `/blog/2/`, `/blog/3/`, …
+
+```astro
+---
+import Layout from "@layouts/Layout.astro";
+import Pagination from "@components/Pagination.astro";
+import { getCollection } from "astro:content";
+import type { GetStaticPaths } from "astro";
+
+export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
+  const posts = (await getCollection("blog", ({ data }) => !data.draft))
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+  return paginate(posts, { pageSize: 9 });
+};
+
+const { page } = Astro.props;
+---
+
+<Layout title={`Blog — page ${page.currentPage}`}>
+  <h1>Blog</h1>
+
+  <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {page.data.map((post) => (
+      <li>
+        <a href={`/blog/${post.id}/`}>
+          <h2>{post.data.title}</h2>
+          <p>{post.data.description}</p>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <Pagination
+    class="mt-10"
+    current={page.currentPage}
+    total={page.lastPage}
+    hrefFor={(p) => (p === 1 ? "/blog/" : `/blog/${p}/`)}
+  />
+</Layout>
+```
+
+`page` is the [`Page` object](https://docs.astro.build/en/reference/api-reference/#page) Astro injects: `page.data` is the posts on this page, `page.currentPage` and `page.lastPage` map directly to this component's `current` / `total` props, and `page.url.prev` / `page.url.next` are also available if you'd rather use them than `hrefFor`.
+
+### 3. Filtering by tag, category, etc.
+
+Wrap the same pattern in a second rest param to paginate filtered subsets — `/blog/tag/astro/`, `/blog/tag/astro/2/`:
+
+```astro
+---
+// src/pages/blog/tag/[tag]/[...page].astro
+export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags ?? []))];
+
+  return tags.flatMap((tag) => {
+    const filtered = posts
+      .filter((p) => p.data.tags?.includes(tag))
+      .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+    return paginate(filtered, {
+      pageSize: 9,
+      params: { tag },
+      props: { tag },
+    });
+  });
+};
+---
+
+<Pagination
+  current={page.currentPage}
+  total={page.lastPage}
+  hrefFor={(p) => (p === 1 ? `/blog/tag/${tag}/` : `/blog/tag/${tag}/${p}/`)}
+/>
+```
+
+### 4. Query-string mode (filters, search)
+
+For `?page=N` style pagination — e.g. when the list is filtered by a search box and you don't want a separate static path per query — a single non-paginated route is enough:
+
+```astro
+---
+// src/pages/blog/index.astro
+const PAGE_SIZE = 9;
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const currentPage = Math.max(1, Number(Astro.url.searchParams.get("page") ?? 1));
+const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE));
+const start = (currentPage - 1) * PAGE_SIZE;
+const pageItems = posts.slice(start, start + PAGE_SIZE);
+---
+
+<Pagination
+  current={currentPage}
+  total={totalPages}
+  hrefFor={(p) => `?${new URLSearchParams({ page: String(p) })}`}
+/>
+```
+
+This needs SSR (`output: "server"` or hybrid mode in `astro.config.mjs`) since the URL search params change per-request. For static builds, prefer pattern (2) — one path per page, fully prerendered, crawlable, and cache-friendly.
+
 ## Truncation algorithm
 
 The list always includes:
