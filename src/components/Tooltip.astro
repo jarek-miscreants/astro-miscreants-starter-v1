@@ -57,8 +57,10 @@ const hasContentSlot = Astro.slots.has("content");
     role="tooltip"
     popover="manual"
     data-tooltip="content"
+    data-placement={placement}
   >
     {hasContentSlot ? <slot name="content" /> : text}
+    <span data-tooltip="arrow" aria-hidden="true"></span>
   </span>
 </span>
 
@@ -79,6 +81,7 @@ const hasContentSlot = Astro.slots.has("content");
     font-size: 0.8125rem;
     line-height: 1.4;
     box-shadow: var(--shadow-popover, 0 4px 12px -4px rgb(0 0 0 / 0.2));
+    overflow: visible; /* let arrow poke outside */
     pointer-events: none; /* tooltips don't intercept hover */
 
     /* Animation in/out (display: discrete + opacity transitions). */
@@ -101,6 +104,47 @@ const hasContentSlot = Astro.slots.has("content");
       opacity: 0;
       transform: translateY(2px);
     }
+  }
+
+  /* Arrow — small rotated square anchored to whichever edge faces the trigger.
+     The two borders facing outward stay; the two facing into the tooltip body
+     are stripped so the arrow looks continuous with the tooltip border. */
+  [data-tooltip="arrow"] {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--color-fg);
+    border: 1px solid var(--color-stroke);
+    pointer-events: none;
+  }
+
+  [data-tooltip="content"][data-placement="top"] [data-tooltip="arrow"] {
+    bottom: -5px;
+    left: var(--tt-arrow-x, 50%);
+    transform: translateX(-50%) rotate(45deg);
+    border-top: 0;
+    border-left: 0;
+  }
+  [data-tooltip="content"][data-placement="bottom"] [data-tooltip="arrow"] {
+    top: -5px;
+    left: var(--tt-arrow-x, 50%);
+    transform: translateX(-50%) rotate(45deg);
+    border-bottom: 0;
+    border-right: 0;
+  }
+  [data-tooltip="content"][data-placement="left"] [data-tooltip="arrow"] {
+    right: -5px;
+    top: var(--tt-arrow-y, 50%);
+    transform: translateY(-50%) rotate(45deg);
+    border-bottom: 0;
+    border-left: 0;
+  }
+  [data-tooltip="content"][data-placement="right"] [data-tooltip="arrow"] {
+    left: -5px;
+    top: var(--tt-arrow-y, 50%);
+    transform: translateY(-50%) rotate(45deg);
+    border-top: 0;
+    border-right: 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -147,7 +191,7 @@ const hasContentSlot = Astro.slots.has("content");
     const reposition = () => {
       const trg = trigger.getBoundingClientRect();
       const tip = tooltip.getBoundingClientRect();
-      const margin = 6;
+      const margin = 8; // leaves room for the arrow + a hair of breathing room
       let top = 0;
       let left = 0;
 
@@ -176,6 +220,22 @@ const hasContentSlot = Astro.slots.has("content");
 
       tooltip.style.top = `${top}px`;
       tooltip.style.left = `${left}px`;
+
+      // Track the arrow to the trigger's center even when the tooltip got
+      // clamped against an edge. Keep it inset from the corners so it doesn't
+      // overrun the borders.
+      const arrowInset = 10;
+      if (placement === "top" || placement === "bottom") {
+        const triggerCenterX = trg.left + trg.width / 2;
+        const rawX = triggerCenterX - left;
+        const x = Math.max(arrowInset, Math.min(rawX, tip.width - arrowInset));
+        tooltip.style.setProperty("--tt-arrow-x", `${x}px`);
+      } else {
+        const triggerCenterY = trg.top + trg.height / 2;
+        const rawY = triggerCenterY - top;
+        const y = Math.max(arrowInset, Math.min(rawY, tip.height - arrowInset));
+        tooltip.style.setProperty("--tt-arrow-y", `${y}px`);
+      }
     };
 
     const open = () => {
