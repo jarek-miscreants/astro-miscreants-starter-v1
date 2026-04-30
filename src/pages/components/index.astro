@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import SectionMain from "../../components/SectionMain.astro";
 import { getCollection } from "astro:content";
 import Button from "../../components/Button.astro";
+import Search from "../../components/Search.astro";
 
 const all = await getCollection("components");
 
@@ -37,17 +38,33 @@ const groups = categoryOrder
       <div class="flex justify-start mt-4">
       <Button href="/styleguide">See Styleguide</Button>
     </div>
+      <Search
+        class="mt-8 max-w-md"
+        targetSelector="[data-search-item]"
+        groupSelector="[data-search-group]"
+        emptySelector="[data-search-empty]"
+        placeholder="Search components — title, description, category…"
+        label="Search components"
+      />
     </SectionMain>
 
     {groups.map((group) => (
-      <SectionMain id={`group-${group.category}`} padding="sm" borderTop>
+      <SectionMain
+        id={`group-${group.category}`}
+        padding="sm"
+        borderTop
+        data-search-group
+      >
         <header class="mb-6 flex items-baseline justify-between gap-4">
           <h2 class="h4">{group.label}</h2>
           <span class="text-xs uppercase tracking-wider text-fg-subtle">{group.items.length}</span>
         </header>
         <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {group.items.map((item) => (
-            <li>
+            <li
+              data-search-item
+              data-search-text={item.data.title}
+            >
               <a
                 href={`/components/${item.id}/`}
                 class="flex h-full flex-col gap-2 border border-stroke bg-canvas p-6 transition hover:bg-panel-muted hover:border-stroke-strong focus-visible:bg-panel-muted outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
@@ -65,5 +82,9 @@ const groups = categoryOrder
         </ul>
       </SectionMain>
     ))}
+
+    <div data-search-empty hidden class="border-t border-stroke px-6 py-16 text-center text-fg-muted">
+      No components match your search.
+    </div>
   </main>
 </Layout>
