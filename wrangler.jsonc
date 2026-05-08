@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "astro-miscreants-starter",
+  "name": "astro-miscreants-starter-v1",
   // No `main` — @astrojs/cloudflare v13 supplies the Worker entry via its
   // Vite plugin. Setting it would fail dev-time checks before the build runs.
   "compatibility_date": "2026-04-04",
