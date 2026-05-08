@@ -231,3 +231,4 @@ Decorative corner accents — 6 × 6 px L-shaped hairlines anchored to `[data-ac
 - **Don't** introduce a new hue without a semantic reason. `error` and `success` are the only permitted accent hues; everything else belongs to the neutral family.
 - **Do** re-anchor fluid type by dropping `container-type: inline-size` on a wrapper when a component renders inside a narrow column.
 - **Don't** rely on `prefers-color-scheme` for dark mode — the site's theme is explicit via `data-theme`, and mixing the two mechanisms leads to FOUC.
+- **Don't** Use any other border radius than border-radius: 0.
